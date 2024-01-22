@@ -1,10 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+
+impo
 import { Head } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <Head title="Clientes" />
+    <Head title="Clientes " />
 
     <AuthenticatedLayout>
         <template #header>

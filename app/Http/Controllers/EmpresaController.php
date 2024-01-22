@@ -86,7 +86,11 @@ class EmpresaController extends Controller
 
     public function destroy(Empresa $empresa)
     {
-        $empresa->delete();
-        return redirect('Empresas');
+        $id = $empresa->k_empresa;
+        $empresa = Empresa::find($id);
+        if($empresa->delete()){
+            return redirect('Empresas');
+        }
+        
     }
 }
