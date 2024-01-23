@@ -39,16 +39,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     //Route::resource('empresas', EmpresaController::class);
-    Route::get('empresas' , [EmpresaController::class, 'index'])->name('empresas.index');
+    Route::get('empresas/index' , [EmpresaController::class, 'index'])->name('empresas.index');
     Route::get('empresas/create' , [EmpresaController::class, 'create'])->name('empresas.create');
-    Route::post('empresas' , [EmpresaController::class, 'store'])->name('empresas.store');
-    Route::get('empresas/{empresa}/edit' , [EmpresaController::class, 'edit'])->name('empresas.edit');
-    Route::put('empresas/{empresa}' , [EmpresaController::class, 'update'])->name('empresas.update');
+    Route::post('empresas/create' , [EmpresaController::class, 'store'])->name('empresas.store');
+    Route::get('empresas/edit/{id}' , [EmpresaController::class, 'edit'])->name('empresas.edit');
+    Route::put('empresas/edit/{id}' , [EmpresaController::class, 'update'])->name('empresas.update');
     Route::delete('empresas/{empresa}' , [EmpresaController::class, 'destroy'])->name('empresas.destroy');
 
-
-    Route::resource('articulos', ArticuloController::class);
-    Route::resource('sujetos', SujetoController::class);
+    Route::get('sujetos/index' , [SujetoController::class, 'index'])->name('sujetos.index');
 });
 
 require __DIR__.'/auth.php';

@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Empresa;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\DB;
-use function Termwind\render;
 
 class EmpresaController extends Controller
 {
@@ -84,13 +81,11 @@ class EmpresaController extends Controller
         $empresa->update($request->all());
     }
 
-    public function destroy(Empresa $empresa)
+    public function destroy(Int $id)
     {
-        $id = $empresa->k_empresa;
         $empresa = Empresa::find($id);
         if($empresa->delete()){
-            return redirect('Empresas');
+            return redirect('empresas/index');
         }
-        
     }
 }

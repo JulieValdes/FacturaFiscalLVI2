@@ -2,8 +2,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import Swal from 'sweetalert2';
-import { Head, useForm } from '@inertiajs/vue3';
-import { Result } from 'postcss';
+import { Head, useForm, Link } from '@inertiajs/vue3';
+import {onMounted} from 'vue'
+
+onMounted(() => {
+  console.log(props)
+})
 
 const props = defineProps({
     empresas: {type: Object},
@@ -13,28 +17,22 @@ const form= useForm({
     k_empresa: '',
 });
 
-const deleteEmpresa = (id, mis_datos_nombre) => {
-    const alerta = Swal.mixin({
-        buttonsStyling: false,
-    });
+const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
+    const alerta = Swal.mixin({buttonsStyling: false,});
 
     alerta.fire({
         title: '¿Estás seguro que quieres eliminar ' + mis_datos_nombre + '?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '<i class="fa-solid fa-check"></i> Sí, eliminar',
-        cancelButtonText: '<i class="fa-solid fa-ban"></i> Cancelar',
+        confirmButtonText: '<i class="fa-solid fa-check ml-2"></i> Sí, eliminar',
+        cancelButtonText: '<i class="fa-solid fa-ban mr-2"></i> Cancelar',
         customClass: {
             confirmButton: 'btn btn-danger mx-2', // Clase de estilo para el botón de confirmar
             cancelButton: 'btn btn-secondary',    // Clase de estilo para el botón de cancelar
         },
     }).then((result) => {
         if (result.isConfirmed) {
-            // Enviar la solicitud de eliminación
-            const form = document.createElement('form');
-            form.method = 'DELETE';
-            form.action = route('empresas.destroy', id);
-            form.submit();
+            form.delete(route('empresas.destroy', { empresa: k_empresa}));
         }
     });
 };
@@ -69,12 +67,12 @@ const deleteEmpresa = (id, mis_datos_nombre) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="emp, i in empresas" :key="emp.k_empresa">
-                        <td class="border border-gray-400 px-4 py-4">{{ emp.k_empresa }}</td>
-                        <td class="border border-gray-400 px-4 py-4">{{ emp.mis_datos_nombre }}</td>
-                        <td class="border border-gray-400 px-4 py-4">{{ emp.mis_datos_municipio}}</td>
+                        <tr v-for="empresa, i in empresas" :key="empresa.k_empresa">
+                        <td class="border border-gray-400 px-4 py-4">{{ empresa.k_empresa }}</td>
+                        <td class="border border-gray-400 px-4 py-4">{{ empresa.mis_datos_nombre }}</td>
+                        <td class="border border-gray-400 px-4 py-4">{{ empresa.mis_datos_municipio}}</td>
                         <td class="border border-gray-400 px-4 py-4">
-                            <DangerButton @click="deleteEmpresa(emp.k_empresa, emp.mis_datos_nombre)">
+                            <DangerButton @click="deleteEmpresa(empresa.k_empresa, empresa.mis_datos_nombre)">
                                 <i class="fa-solid fa-trash"></i>
                             </DangerButton>
                         </td>
