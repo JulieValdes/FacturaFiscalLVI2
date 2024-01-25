@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class SujetoController extends Controller
 {
+
+    //DESPUES DE PRUEBAS ESPECIFICAR EN LA CONSULTA SI ES USUARIO O PROVEEDOR
     public function index()
     {
         // Obtén el ID de la empresa del usuario logueado
@@ -19,17 +21,16 @@ class SujetoController extends Controller
             ->select('usrs_empresas.k_empresa')
             ->first();
 
-        dd($k_empresa_usuario);
 
         // Obtén los sujetos que pertenecen a la empresa del usuario logueado
-        $sujetos = Sujeto::join('mis_datos', 'sujetos.k_empresa', '=', 'mis_datos.k_empresa')
-            ->where('sujetos.k_empresa', '=', $k_empresa_usuario)
+        $sujetos = DB::table('sujetos')
+            ->join('mis_datos', 'sujetos.k_empresa', '=', 'mis_datos.k_empresa')
+            ->where('sujetos.k_empresa', '=', $k_empresa_usuario->k_empresa)
             ->select('sujetos.*')
-            ->paginate(10);
+            ->get();
 
-        $empresas = Empresa::all();
 
-        return Inertia::render('sujetos/index', ['sujetos' => $sujetos, 'empresas' => $empresas]);    
+        return Inertia::render('Sujetos/Index', ['sujetos' => $sujetos]);    
     }
 
     public function store(Request $request){
@@ -43,7 +44,7 @@ class SujetoController extends Controller
         $sujeto = new Sujeto();
         $sujeto->fill($request->all());
         if($sujeto->save()){
-            return redirect('Sujetos');
+            return redirect('sujetos');
         }
     }
 
@@ -60,7 +61,7 @@ class SujetoController extends Controller
                 ->update($request->all());
 
         if($result){
-            return redirect('Sujetos');
+            return redirect('sujetos');
         }
     }
 

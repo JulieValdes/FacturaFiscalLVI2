@@ -32,7 +32,11 @@ const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
         },
     }).then((result) => {
         if (result.isConfirmed) {
-            form.delete(route('empresas.destroy', { empresa: k_empresa}));
+            form.delete(route('empresas.destroy',  k_empresa), {
+                onSuccess: () => {
+                    ok('Empresa eliminada');
+                },
+            });
         }
     });
 };
