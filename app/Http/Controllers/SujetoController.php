@@ -48,7 +48,7 @@ class SujetoController extends Controller
         }
     }
 
-    public function update(Sujeto $sujeto){
+    public function update(Request $request, Int $id){
         $request->validate([
             'k_empresa' => 'required',
             'sujetos_nombre' => 'required',
@@ -56,21 +56,24 @@ class SujetoController extends Controller
             'sujetos_regimen' => 'required',
         ]);
 
+        dd($request);
+        
         $result = Sujeto::where('k_sujetos', $id)
                 ->where('k_empresa', $request->k_empresa)
                 ->update($request->all());
 
+
         if($result){
             return redirect('sujetos');
+        }else {
+            return response()->json(['error' => 'Error al actualizar el cliente'], 500);
         }
     }
 
     public function destroy(Sujeto $sujeto, Empresa $empresa){
-        $result = Sujeto::where('k_sujetos', $empresa)->where('k_empresa', $request->k_empresa)->delete();
+        $result = Sujeto::where('k_sujetos', $empresa)->where('k_empresa', $sujeto->k_empresa)->delete();
         if($result){
             return redirect('sujetos');
         }
     }
-
-   
 }
