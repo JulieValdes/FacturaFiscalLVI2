@@ -1,9 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
 import Swal from 'sweetalert2';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import {onMounted} from 'vue'
+import { defineProps } from 'vue';
+import DangerButton from '@/Components/DangerButton.vue';
+import InputError from '@/Components/InputError.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
+import SelectInput from '@/Components/SelectInput.vue';
+import WarningButton from '@/Components/WarningButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import Modal from '@/Components/Modal.vue';
+import { nextTick,ref } from 'vue';
+import VueTailwindPagination from '@ocrv/vue-tailwind-pagination';
 
 onMounted(() => {
   console.log(props)
@@ -75,11 +85,18 @@ const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
                         <td class="border border-gray-400 px-4 py-4">{{ empresa.k_empresa }}</td>
                         <td class="border border-gray-400 px-4 py-4">{{ empresa.mis_datos_nombre }}</td>
                         <td class="border border-gray-400 px-4 py-4">{{ empresa.mis_datos_municipio}}</td>
-                        <td class="border border-gray-400 px-4 py-4">
-                            <DangerButton @click="deleteEmpresa(empresa.k_empresa, empresa.mis_datos_nombre)">
-                                <i class="fa-solid fa-trash"></i>
-                            </DangerButton>
-                        </td>
+                        <td class="border border-gray-400 px-2 py-2">
+                                <WarningButton 
+                                    @click="openModal(2,empresa.k_empresa, empresa.mis_datos_nombre, empresa.mis_datos_municipio, empresa.mis_datos_direccion, empresa.mis_datos_telefono, empresa.mis_datos_email, empresa.mis_datos_rfc, empresa.mis_datos_curp, empresa.mis_datos_ine, empresa.mis_datos_tipo, empresa.mis_datos_status)"
+                                >
+                                <i class="fa-solid fa-edit"></i>
+                                </WarningButton>
+                            </td>
+                            <td class="border border-gray-400 px-2 py-2">
+                                <DangerButton @click="deleteEmpresa(empresa.k_empresa, empresa.mis_datos_nombre)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </DangerButton>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

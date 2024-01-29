@@ -47,9 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('empresas/{empresa}' , [EmpresaController::class, 'destroy'])->name('empresas.destroy');
 
     Route::get('sujetos' , [SujetoController::class, 'index'])->name('sujetos.index');
-    Route::post('sujetos/create' , [SujetoController::class, 'store'])->name('sujetos.store');
+    Route::post('sujetos' , [SujetoController::class, 'store'])->name('sujetos.store');
     Route::get('sujetos/edit/{id}' , [SujetoController::class, 'edit'])->name('sujetos.edit');
-    Route::put('sujetos/{id}/edit' , [SujetoController::class, 'update'])->name('sujetos.update');
+    Route::put('sujetos/{id}' , [SujetoController::class, 'update'])->name('sujetos.update');
     Route::delete('sujetos/{sujeto}/{empresa}' , [SujetoController::class, 'destroy'])->name('sujetos.destroy');
 });
 

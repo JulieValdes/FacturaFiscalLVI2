@@ -22,6 +22,7 @@ const modal = ref(false);
 const title = ref('');
 const operation = ref(1);
 const k_sujetos = ref('');
+const k_empresa = ref('');
 
 const props = defineProps({
     sujetos: {type:Object}
@@ -44,10 +45,23 @@ const form = useForm({
     sujetos_rfc: '',
     sujetos_referencia: '',
     sujetos_alias: '',
-    sujetos_cliente: '',
-    sujetos_proveedor: '',
+    sujetos_cliente: '0',
+    sujetos_proveedor: '0',
     sujetos_telefono: '',
-    sujetos_regimen: ''
+    sujetos_regimen: '',
+    k_sujetos: '',
+    k_empresa: ''
+},{
+    sujetos_nombre: { required: true, maxLength: 50, minLength: 3 },
+    sujetos_alias: { required: true, maxLength: 50, minLength: 3 },
+    sujetos_regimen: { required: true },
+    sujetos_telefono: { required: true, numeric: true },
+    sujetos_numero_ext: { required: true, numeric: true },
+
+},{
+  validateOnInput: true, // Validación inmediata al teclear
+  debounce: 0, // Sin retardo de debounce (puede ajustarse según tus necesidades)
+  validateOnChange: true, // Validar al cambiar el valor del campo  
 });
 const formPage = useForm({});
 
@@ -56,14 +70,17 @@ const onPageClick = (event)=>{
 }
 
 
-const openModal = (op,sujetos_nombre,sujetos_calle,sujetos_numero_ext,sujetos_numero_int,sujetos_colonia,sujetos_ciudad,sujetos_estado,sujetos_cp,sujetos_pais,sujetos_email,sujetos_rfc,sujetos_referencia,sujetos_alias,sujetos_cliente,sujetos_proveedor,sujetos_telefono,borrado,sujetos_regimen, sujeto) =>{
-
+const openModal = (op,empresa,sujetos_nombre,sujetos_calle,sujetos_numero_ext,sujetos_numero_int,sujetos_colonia,sujetos_ciudad,sujetos_estado,sujetos_cp,sujetos_pais,sujetos_email,sujetos_rfc,sujetos_referencia,sujetos_alias,sujetos_cliente,sujetos_proveedor,sujetos_telefono,sujetos_regimen, sujeto) =>{
+    console.log("Valor de sujeto en openModal:", sujeto);
+    console.log("Valor de sujetos_regimen antes de abrir el modal:", sujetos_regimen);
     modal.value = true;
 
     nextTick(() => nameInput.value.focus());
 
     operation.value = op;
     k_sujetos.value =  sujeto; 
+    k_empresa.value = empresa;
+
 
     if(op == 1){
         title.value = 'Crear cliente';
@@ -86,7 +103,6 @@ const openModal = (op,sujetos_nombre,sujetos_calle,sujetos_numero_ext,sujetos_nu
         form.sujetos_cliente = sujetos_cliente;
         form.sujetos_proveedor = sujetos_proveedor;
         form.sujetos_telefono = sujetos_telefono;
-        form.borrado = borrado;
         form.sujetos_regimen = sujetos_regimen;
     }
 }
@@ -106,17 +122,65 @@ const save = () =>{
     if(operation.value == 1){
         form.post(route('sujetos.store'),{
             onSuccess: () => {ok('Cliente creado')},
-            onError : (error) => {
-                er('Cliente no actualizado '+ error.message);}
-        });
+            onError: (error) => {
+            // Manejar errores aquí
+            
+            if (error.response) {
+                // El servidor ha respondido con un código de estado fuera del rango de éxito
+                console.error('Error de respuesta del servidor:', error.response);
+                
+                if (error.response.data && error.response.data.message) {
+                    er('Error al actualizar: ' + error.response.data.message);
+                } else {
+                    er('Error al actualizar: respuesta del servidor sin mensaje específico');
+                }
+            } else if (error.request) {
+                // La solicitud fue realizada pero no se recibió respuesta
+                console.error('No se recibió respuesta del servidor');
+                er('Error al actualizar: no se recibió respuesta del servidor');
+            } else {
+                // Algo ocurrió durante la configuración de la solicitud
+                console.error('Error durante la configuración de la solicitud:', error.message);
+                er('Error al actualizar: ' + error.message || 'Error desconocido');
+            }
+            console.error('Error completo:', error);
+        },
+    });
     }
     else{
+        form.k_sujetos = k_sujetos.value;
+        form.k_empresa = k_empresa.value;
+        form.put(route('sujetos.update', k_sujetos.value), {
+        k_empresa: form.k_empresa,
+        sujetos_nombre: form.sujetos_nombre,
+        onSuccess: () => {
+            ok('Cliente actualizado');
+        },
+        onError: (error) => {
+            // Manejar errores aquí
+            console.error('Error completo:', error);
 
-        form.put(route('sujetos.update', k_sujetos.value),{
-            onSuccess: () => {ok('Cliente actualizado')},
-            onError : (error) => {
-                er('Error al actualizar '+ error.message);}
-        });
+            if (error.response) {
+                // El servidor ha respondido con un código de estado fuera del rango de éxito
+                console.error('Error de respuesta del servidor:', error.response);
+
+                if (error.response.data && error.response.data.message) {
+                    er('Error al actualizar: ' + error.response.data.message);
+                } else {
+                    er('Error al actualizar: respuesta del servidor sin mensaje específico');
+                }
+            } else if (error.request) {
+                // La solicitud fue realizada pero no se recibió respuesta
+                console.error('No se recibió respuesta del servidor');
+                er('Error al actualizar: no se recibió respuesta del servidor');
+            } else {
+                // Algo ocurrió durante la configuración de la solicitud
+                console.error('Error durante la configuración de la solicitud:', error.message);
+                er('Error al actualizar: ' + error.message || 'Error desconocido');
+            }
+        },
+    });
+
     }
 }
 
@@ -128,23 +192,31 @@ const er = (msj) =>{
 }
 
 
-const deleteSujetos = (k_sujetos,sujetos_nombre) =>{
-    const alerta = Swal.mixin({
-        buttonsStyling:true
-    });
+const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
+    const alerta = Swal.mixin({buttonsStyling: false,});
+
     alerta.fire({
-        title:'¿Estás seguro que quieres eliminar  '+sujetos_nombre+' ?',
-        icon:'question', showCancelButton:true,
-        confirmButtonText:'<i class="fa-solid fa-check"></i> Yes,delete',
-        cancelButtonText:'<i class="fa-solid fa-ban"></i> Cancel'
+        title: '¿Estás seguro que quieres eliminar ' + sujetos_nombre + '?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-check ml-2"></i> Sí, eliminar',
+        cancelButtonText: '<i class="fa-solid fa-ban mr-2"></i> Cancelar',
+        customClass: {
+            confirmButton: 'btn btn-danger mx-2', // Clase de estilo para el botón de confirmar
+            cancelButton: 'btn btn-secondary',    // Clase de estilo para el botón de cancelar
+        },
     }).then((result) => {
-        if(result.isConfirmed) {
-            form.delete(route('sujetos.destroy',k_sujetos),{
-                onSuccess: () =>{ok('Cliente eliminado')}
+        if (result.isConfirmed) {
+            form.delete(route('sujetos.destroy',  k_sujetos,k_empresa), {
+                onSuccess: () => {
+                    ok('Empresa eliminada');
+                },
+
             });
         }
     });
-}
+};
+
 </script>
 
 <template>
@@ -183,17 +255,32 @@ const deleteSujetos = (k_sujetos,sujetos_nombre) =>{
                             <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_nombre }}</td>
                             <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_rfc }}</td>
                             <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_alias}}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_cliente }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_proveedor }}</td>
+                            <td class="border border-gray-400 px-2 py-2">
+                                <span v-if="sujeto.sujetos_cliente == 1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50"
+                                    style="fill:#22C3E6;">
+                                        <path d="M43.171,10.925L24.085,33.446l-9.667-9.015l1.363-1.463l8.134,7.585L41.861,9.378C37.657,4.844,31.656,2,25,2 C12.317,2,2,12.317,2,25s10.317,23,23,23s23-10.317,23-23C48,19.701,46.194,14.818,43.171,10.925z"></path>
+                                    </svg>
+                                </span>
+                            </td>
+                            <td class="border border-gray-400 px-2 py-2">
+                                <span v-if="sujeto.sujetos_proveedor == 1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50"
+                                    style="fill:#22C3E6;">
+                                        <path d="M43.171,10.925L24.085,33.446l-9.667-9.015l1.363-1.463l8.134,7.585L41.861,9.378C37.657,4.844,31.656,2,25,2 C12.317,2,2,12.317,2,25s10.317,23,23,23s23-10.317,23-23C48,19.701,46.194,14.818,43.171,10.925z"></path>
+                                    </svg>
+                                </span>
+                                
+                            </td>
                             <td class="border border-gray-400 px-2 py-2">
                                 <WarningButton 
-                                    @click="openModal(2, sujeto.sujetos_nombre, sujeto.sujetos_calle, sujeto.sujetos_numero_ext, sujeto.sujetos_numero_int, sujeto.sujetos_colonia, sujeto.sujetos_ciudad, sujeto.sujetos_estado, sujeto.sujetos_cp, sujeto.sujetos_pais, sujeto.sujetos_email, sujeto.sujetos_rfc, sujeto.sujetos_referencia, sujeto.sujetos_alias, sujeto.sujetos_cliente, sujeto.sujetos_proveedor, sujeto.sujetos_telefono, sujeto.borrado, sujeto.sujetos_regimen, sujeto.k_sujetos)"
+                                    @click="openModal(2, sujeto.k_empresa, sujeto.sujetos_nombre, sujeto.sujetos_calle, sujeto.sujetos_numero_ext, sujeto.sujetos_numero_int, sujeto.sujetos_colonia, sujeto.sujetos_ciudad, sujeto.sujetos_estado, sujeto.sujetos_cp, sujeto.sujetos_pais, sujeto.sujetos_email, sujeto.sujetos_rfc, sujeto.sujetos_referencia, sujeto.sujetos_alias, sujeto.sujetos_cliente, sujeto.sujetos_proveedor, sujeto.sujetos_telefono, sujeto.sujetos_regimen, sujeto.k_sujetos)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
                             <td class="border border-gray-400 px-2 py-2">
-                                <DangerButton @click="deleteSujetos(sujeto.k_sujetos, sujeto.sujetos_nombre)">
+                                <DangerButton @click="deleteSujetos(sujeto.k_sujetos, sujeto.sujetos_nombre, sujeto.k_empresa)">
                                     <i class="fa-solid fa-trash"></i>
                                 </DangerButton>
                             </td>
@@ -326,26 +413,10 @@ const deleteSujetos = (k_sujetos,sujetos_nombre) =>{
                         <label for="sujetos_cliente">Cliente</label><br>
                     </div>
                     <div class="mt-1 block w-1/3 ">
-                        <input type="radio" id="sujetos_proovedor" name="cl_o_pr" value="1" v-model="form.sujetos_proveedor">
+                        <input type="radio" id="sujetos_proovedor" name="cl_o_pr" default_value="0" value="1" v-model="form.sujetos_proveedor">
                         <label for="sujetos_proovedor">Proovedor</label><br>
                     </div>
                 </div>
-                    
-                <!--<div class="p-3">
-                    <InputLabel for="sujetos_cliente" value="Cliente:"></InputLabel>
-                    <TextInput id="sujetos_cliente"
-                    v-model="form.sujetos_cliente" type="text" class="mt-1 block w-3/4"
-                    placeholder="Cliente"></TextInput>
-                    <InputError :message="form.errors.sujetos_cliente" class="mt-2"></InputError>
-                </div>
-                <div class="p-3">
-                    <InputLabel for="sujetos_proovedor" value="Proovedor:"></InputLabel>
-                    <TextInput id="sujetos_proovedor"
-                    v-model="form.sujetos_proovedor" type="text" class="mt-1 block w-3/4"
-                    placeholder="Proovedor"></TextInput>
-                    <InputError :message="form.errors.sujetos_proovedor" class="mt-2"></InputError>
-                </div>
-                -->
                 <div class="p-3 w-3/4">
                     <InputLabel for="sujetos_regimen" value="Regimen Fiscal:"></InputLabel>
                     <select id="sujetos_regimen" v-model="form.sujetos_regimen" name="sujetos_regimen" autocomplete="sujetos_regimen" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
@@ -375,8 +446,6 @@ const deleteSujetos = (k_sujetos,sujetos_nombre) =>{
                         <option value="630 - Enajenacion de acciones en bolsa de valores">630 - Enajenacion de acciones en bolsa de valores</option>
                     </select>
                 </div>
-                
-
                 <div class="p-3 mt-6">
                     <PrimaryButton :disabled="form.processing" @click="save">
                         <i class="fa-solid fa-save"></i> Guardar
