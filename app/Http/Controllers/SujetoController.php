@@ -81,9 +81,8 @@ class SujetoController extends Controller
         }
     }
 
-    public function destroy(Sujeto $sujeto, Empresa $empresa){
-        dd($sujeto, $empresa);
-        $result = Sujeto::where('k_sujetos', $empresa)->where('k_empresa', $request->k_empresa)->delete();
+    public function destroy(Int $k_sujetos, Int $k_empresa){
+        $result = Sujeto::where('k_sujetos', $k_sujetos)->where('k_empresa', $k_empresa)->delete();
         if($result){
             return redirect('sujetos');
         }

@@ -5,7 +5,6 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import SelectInput from '@/Components/SelectInput.vue';
 import WarningButton from '@/Components/WarningButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Modal from '@/Components/Modal.vue';
@@ -31,6 +30,7 @@ const props = defineProps({
 onMounted(() => {
     console.log(props.sujetos);
 })
+
 const form = useForm({
     sujetos_nombre: '',
     sujetos_calle: '',
@@ -63,6 +63,7 @@ const form = useForm({
   debounce: 0, // Sin retardo de debounce (puede ajustarse según tus necesidades)
   validateOnChange: true, // Validar al cambiar el valor del campo  
 });
+
 const formPage = useForm({});
 
 const onPageClick = (event)=>{
@@ -207,7 +208,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
         },
     }).then((result) => {
         if (result.isConfirmed) {
-            form.delete(route('sujetos.destroy',  k_sujetos,k_empresa), {
+            form.delete(route('sujetos.destroy',  [k_sujetos, k_empresa]), {
                 onSuccess: () => {
                     ok('Empresa eliminada');
                 },

@@ -46,11 +46,25 @@ Route::middleware('auth')->group(function () {
     Route::put('empresas/edit/{id}' , [EmpresaController::class, 'update'])->name('empresas.update');
     Route::delete('empresas/{empresa}' , [EmpresaController::class, 'destroy'])->name('empresas.destroy');
 
+    /*---------------Rutas de sujetos------------ */
     Route::get('sujetos' , [SujetoController::class, 'index'])->name('sujetos.index');
     Route::post('sujetos' , [SujetoController::class, 'store'])->name('sujetos.store');
-    Route::get('sujetos/edit/{id}' , [SujetoController::class, 'edit'])->name('sujetos.edit');
     Route::put('sujetos/{id}' , [SujetoController::class, 'update'])->name('sujetos.update');
     Route::delete('sujetos/{sujeto}/{empresa}' , [SujetoController::class, 'destroy'])->name('sujetos.destroy');
+
+    /*---------------Rutas de articulos------------ */
+    Route::get('articulos' , [ArticuloController::class, 'index'])->name('articulos.index');
+    Route::post('articulos' , [ArticuloController::class, 'store'])->name('articulos.store');
+    Route::put('articulos/{id}' , [ArticuloController::class, 'update'])->name('articulos.update');
+    Route::delete('articulos/{articulo}/{empresa}' , [ArticuloController::class, 'destroy'])->name('articulos.destroy');
+});
+
+Route::get('prueba', function ($id) {
+    return "Has accedido a la ruta";
+})->middleware('checkAdmin');
+
+Route::get('no-autorizado', function ($id) {
+    return "No tienes permisos para acceder a esta ruta";
 });
 
 require __DIR__.'/auth.php';
