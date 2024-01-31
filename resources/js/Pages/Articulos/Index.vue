@@ -39,10 +39,10 @@ const form = useForm({
     articulo_almacenable: '',
     articulo_precio: '',
     articulo_costo: '',
-    articulo_poriva: '',
-    articulo_retiva: '',
-    articulo_retisr: '',
-    borrado: '',
+    articulo_poriva: '16.00',
+    articulo_retiva: '0.0000',
+    articulo_retisr: '0.0000',
+    borrado: '0',
     articulo_codigo_sat: '',
     articulo_unidad_sat: ''
 },);
@@ -171,8 +171,8 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
         title: '¿Estás seguro que quieres eliminar ' + articulo_nombre + '?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '<i class="fa-solid fa-check ml-2"></i> Sí, eliminar',
-        cancelButtonText: '<i class="fa-solid fa-ban mr-2"></i> Cancelar',
+        confirmButtonText: '<i class="ml-2 fa-solid fa-check"></i> Sí, eliminar',
+        cancelButtonText: '<i class="mr-2 fa-solid fa-ban"></i> Cancelar',
         customClass: {
             confirmButton: 'btn btn-danger mx-2', // Clase de estilo para el botón de confirmar
             cancelButton: 'btn btn-secondary',    // Clase de estilo para el botón de cancelar
@@ -194,19 +194,19 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Productos</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Productos</h2>
         </template>
 
         <div class="py-12">
-            <div class="bg-white grid v-screen place-items-center">
-                <div class="mt-3 mb-3 flex">
+            <div class="grid bg-white v-screen place-items-center">
+                <div class="flex mt-3 mb-3">
                     <PrimaryButton @click="openModal(1)">
                         <i class="fa-solid fa-plus-circle"></i> Agregar
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="bg-white grid v-screen place-items-center overflow-x-auto py-3">
-                <table class="table-auto border border-gray-400">
+            <div class="grid py-3 overflow-x-auto bg-white v-screen place-items-center">
+                <table class="border border-gray-400 table-auto">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="px-2 py-2">#</th>
@@ -220,19 +220,19 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
                     </thead>
                     <tbody>
                         <tr v-for="(articulo, index) in articulos" :key="index">
-                            <td class="border border-gray-400 px-2 py-2">{{ articulo.k_articulo }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ articulo.articulo_clave }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ articulo.articulo_nombre }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ articulo.articulo_codigo }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ articulo.articulo_precio }}</td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">{{ articulo.k_articulo }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ articulo.articulo_clave }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ articulo.articulo_nombre }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ articulo.articulo_codigo }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ articulo.articulo_precio }}</td>
+                            <td class="px-2 py-2 border border-gray-400">
                                 <WarningButton 
                                     @click="openModal(2, articulo.k_articulo, articulo.k_empresa, articulo.articulo_clave, articulo.articulo_nombre, articulo.articulo_codigo, articulo.articulo_unidad, articulo.articulo_almacenable, articulo.articulo_precio, articulo.articulo_costo, articulo.articulo_poriva, articulo.articulo_retiva, articulo.articulo_retisr, articulo.borrado, articulo.articulo_codigo_sat, articulo.articulo_unidad_sat)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">
                                 <DangerButton @click="deleteArticulo(articulo.k_articulo, articulo.articulo_nombre,articulo.k_empresa)">
                                     <i class="fa-solid fa-trash"></i>
                                 </DangerButton>
@@ -243,75 +243,44 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
             </div>
         </div>
         <Modal :show="modal" @close="closeModal">
-            <div class="flex items-center justify-center flex-col mt-5">
-                <h2 class="p-3 text-lg font-semibolds text-gray-900">{{ title }}</h2>
-                <div class="p-3 mt-3 w-3/4">
-                    <InputLabel for="articulos_nombre" value="Nombre:"></InputLabel>
-                    <TextInput id="articulos_nombre" ref="nameInput"
-                    v-model="form.articulo_nombre" type="text" class="mt-1 block w-full" placeholder="Nombre"></TextInput>
-                    <InputError :message="form.errors.articulo_nombre" class="mt-2"></InputError>
-                </div>
+            <div class="flex flex-col items-center justify-center mt-5">
+                <h2 class="justify-start p-3 text-lg text-gray-900 font-semibolds ">{{ title }}</h2>
                 <div class="flex flex-row w-3/4">
                     <div class="p-3">
-                        <InputLabel for="articulo_clave" value="Clave:"></InputLabel>
+                        <InputLabel for="articulos_nombre" value="Nombre :"></InputLabel>
+                        <TextInput id="articulos_nombre" ref="nameInput"
+                        v-model="form.articulo_nombre" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="Nombre"></TextInput>
+                        <InputError :message="form.errors.articulo_nombre" class="mt-2"></InputError>
+                    </div>
+                    <div class="p-3"  >
+                        <InputLabel for="articulo_clave" value="Clave Ext:" class="ml-4"></InputLabel>
                         <TextInput id="articulo_clave"
-                        v-model="form.articulo_clave" type="text" class="mt-1 mr-6 block-sm w-full"
+                        v-model="form.articulo_clave" type="text" class="w-full mt-1 ml-4 block-sm"
                         placeholder="Clave"></TextInput>
                         <InputError :message="form.errors.articulo_clave" class="mt-2"></InputError>
                     </div>
+                </div>
+                <div class="flex flex-row w-3/4">
                     <div class="p-3">
                         <InputLabel for="articulo_codigo" value="Código:"></InputLabel>
                         <TextInput id="articulo_codigo"
-                        v-model="form.articulo_codigo" type="text" class="mt-1 block-sm w-full"
+                        v-model="form.articulo_codigo" type="text" class="w-full mt-1 mr-6 block-sm"
                         placeholder="Código"></TextInput>
                         <InputError :message="form.errors.articulo_codigo" class="mt-2"></InputError>
                     </div>
-                </div>
-                <div class="flex flex-row w-3/4">
                     <div class="p-3">
-                        <InputLabel for="articulo_precio" value="Precio:"></InputLabel>
-                        <TextInput id="articulo_precio"
-                        v-model="form.articulo_precio" type="text" class="mt-1 mr-6 block-sm w-full"
-                        placeholder="Precio"></TextInput>
-                        <InputError :message="form.errors.articulo_precio" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="articulo_costo" value="Costo:"></InputLabel>
-                        <TextInput id="articulo_costo"
-                        v-model="form.articulo_costo" type="text" class="mt-1 block-sm w-full"
-                        placeholder="Costo"></TextInput>
-                        <InputError :message="form.errors.articulo_costo" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="articulo_poriva" value="Porcentaje IVA:"></InputLabel>
-                        <TextInput id="articulo_poriva"
-                        v-model="form.articulo_poriva" type="text" class="mt-1 mr-6 block-sm w-full"
-                        placeholder="Porcentaje IVA"></TextInput>
-                        <InputError :message="form.errors.articulo_poriva" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="articulo_retiva" value="Retención IVA:"></InputLabel>
-                        <TextInput id="articulo_retiva"
-                        v-model="form.articulo_retiva" type="text" class="mt-1 block-sm w-full"
-                        placeholder="Retención IVA"></TextInput>
-                        <InputError :message="form.errors.articulo_retiva" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="articulo_retisr" value="Retención ISR:"></InputLabel>
-                        <TextInput id="articulo_retisr"
-                        v-model="form.articulo_retisr" type="text" class="mt-1 mr-6 block-sm w-full"
-                        placeholder="Retención ISR"></TextInput>
-                        <InputError :message="form.errors.articulo_retisr" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="articulo_codigo_sat" value="Código SAT:"></InputLabel>
-                        <TextInput id="articulo_codigo_sat"
-                        v-model="form.articulo_codigo_sat" type="text" class="mt-1 block-sm w-full"
-                        placeholder="Código SAT"></TextInput>
+                        <InputLabel for="articulo_codigo_sat"  class="ml-4" >
+                            Código SAT:
+                        </InputLabel>
+                        <div class="relative">
+                            <TextInput id="articulo_codigo_sat"
+                                v-model="form.articulo_codigo_sat" type="text" class="w-full mt-1 ml-4 block-sm"
+                                placeholder="Código SAT">
+                            </TextInput>
+                            <a href="http://200.57.3.89/PyS/catPyS.aspx" target="_blank" rel="noopener noreferrer" class="absolute transform -translate-y-1/2 right-1 top-1/2" title="Guia SAT">
+                                <i class="fa-solid fa-search"></i>
+                            </a>
+                        </div>
                         <InputError :message="form.errors.articulo_codigo_sat" class="mt-2"></InputError>
                     </div>
                 </div>
@@ -319,27 +288,62 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="articulo_unidad" value="Unidad:"></InputLabel>
                         <TextInput id="articulo_unidad"
-                        v-model="form.articulo_unidad" type="text" class="mt-1 mr-6 block-sm w-full"
+                        v-model="form.articulo_unidad" type="text" class="w-full mt-1 mr-6 block-sm"
                         placeholder="Unidad"></TextInput>
                         <InputError :message="form.errors.articulo_unidad" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="articulo_unidad_sat" value="Unidad SAT:"></InputLabel>
-                        <TextInput id="articulo_unidad_sat"
-                        v-model="form.articulo_unidad_sat" type="text" class="mt-1 block-sm w-full"
-                        placeholder="Unidad SAT"></TextInput>
+                        <InputLabel for="articulo_unidad_sat" value="Unidad SAT:" class="ml-4"></InputLabel>
+                        <div class="relative">
+                            <TextInput id="articulo_unidad_sat"
+                            v-model="form.articulo_unidad_sat" type="text" class="w-full mt-1 ml-4 block-sm"
+                            placeholder="Unidad SAT"></TextInput>
+                            <a href="http://200.57.3.89/PyS/catUnidades.aspx" target="_blank" rel="noopener noreferrer" class="absolute transform -translate-y-1/2 right-1 top-1/2" title="Guia SAT">
+                                <i class="fa-solid fa-search"></i>
+                            </a>
+                        </div>
                         <InputError :message="form.errors.articulo_unidad_sat" class="mt-2"></InputError>
                     </div>
                 </div>
+                <div class="flex flex-row w-3/4">
+                    <div class="p-3">
+                        <InputLabel for="articulo_precio" value="Precio:"></InputLabel>
+                        <TextInput id="articulo_precio"
+                        v-model="form.articulo_precio" type="text" class="w-full mt-1 mr-6 block-sm"
+                        placeholder="Precio"></TextInput>
+                        <InputError :message="form.errors.articulo_precio" class="mt-2"></InputError>
+                    </div>
+                    <div class="p-3">
+                        <InputLabel for="articulo_costo" value="Costo:"  class="ml-4"></InputLabel>
+                        <TextInput id="articulo_costo"
+                        v-model="form.articulo_costo" type="text" class="w-full mt-1 ml-4 block-sm"
+                        placeholder="Costo"></TextInput>
+                        <InputError :message="form.errors.articulo_costo" class="mt-2"></InputError>
+                    </div>
+                </div>
+                <div class="flex flex-row w-3/4">
+                    <div class="p-3 ">
+                        <InputLabel for="articulo_poriva" value="Porcentaje IVA %:"></InputLabel>
+                        <TextInput id="articulo_poriva"
+                        v-model="form.articulo_poriva" type="text" class="block w-full mt-1 mr-6"
+                        placeholder="Porcentaje IVA"></TextInput>
+                        <InputError :message="form.errors.articulo_poriva" class="mt-2"></InputError>
+                    </div>
+                    <div class="p-3">
+                        <div class="w-full ml-6 mt-7 block-sm">
+                            <input type="radio"  id="articulo_almacenable" name="cl_o_pr" default_value="0" value="1" v-model="form.articulo_almacenable">
+                            <label for="articulo_almacenable">Almacenable</label><br>
+                        </div>
+                    </div>
+                </div>
                 
-                
-                <div class="p-3 mt-6">
+                <div class="p-3 mt-3">
                     <PrimaryButton :disabled="form.processing" @click="save">
                         <i class="fa-solid fa-save"></i> Guardar
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="p-3 mt-6 flex justify-end">
+            <div class="flex justify-end p-3 mt-6">
                 <SecondaryButton class="ml-3" :disabled="form.processing" @click="closeModal">
                     Cancelar
                 </SecondaryButton>

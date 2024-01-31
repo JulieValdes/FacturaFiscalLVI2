@@ -200,8 +200,8 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
         title: '¿Estás seguro que quieres eliminar ' + sujetos_nombre + '?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '<i class="fa-solid fa-check ml-2"></i> Sí, eliminar',
-        cancelButtonText: '<i class="fa-solid fa-ban mr-2"></i> Cancelar',
+        confirmButtonText: '<i class="ml-2 fa-solid fa-check"></i> Sí, eliminar',
+        cancelButtonText: '<i class="mr-2 fa-solid fa-ban"></i> Cancelar',
         customClass: {
             confirmButton: 'btn btn-danger mx-2', // Clase de estilo para el botón de confirmar
             cancelButton: 'btn btn-secondary',    // Clase de estilo para el botón de cancelar
@@ -225,19 +225,19 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Clientes</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Clientes</h2>
         </template>
 
         <div class="py-12">
-            <div class="bg-white grid v-screen place-items-center">
-                <div class="mt-3 mb-3 flex">
+            <div class="grid bg-white v-screen place-items-center">
+                <div class="flex mt-3 mb-3">
                     <PrimaryButton @click="openModal(1)">
                         <i class="fa-solid fa-plus-circle"></i> Agregar
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="bg-white grid v-screen place-items-center overflow-x-auto py-3">
-                <table class="table-auto border border-gray-400">
+            <div class="grid py-3 overflow-x-auto bg-white v-screen place-items-center">
+                <table class="border border-gray-400 table-auto">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="px-2 py-2">#</th>
@@ -252,11 +252,11 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     </thead>
                     <tbody>
                         <tr v-for="(sujeto, index) in sujetos" :key="index">
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.k_sujetos }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_nombre }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_rfc }}</td>
-                            <td class="border border-gray-400 px-2 py-2">{{ sujeto.sujetos_alias}}</td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">{{ sujeto.k_sujetos }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ sujeto.sujetos_nombre }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ sujeto.sujetos_rfc }}</td>
+                            <td class="px-2 py-2 border border-gray-400">{{ sujeto.sujetos_alias}}</td>
+                            <td class="px-2 py-2 border border-gray-400">
                                 <span v-if="sujeto.sujetos_cliente == 1">
                                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50"
                                     style="fill:#22C3E6;">
@@ -264,7 +264,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                                     </svg>
                                 </span>
                             </td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">
                                 <span v-if="sujeto.sujetos_proveedor == 1">
                                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50"
                                     style="fill:#22C3E6;">
@@ -273,14 +273,14 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                                 </span>
                                 
                             </td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">
                                 <WarningButton 
                                     @click="openModal(2, sujeto.k_empresa, sujeto.sujetos_nombre, sujeto.sujetos_calle, sujeto.sujetos_numero_ext, sujeto.sujetos_numero_int, sujeto.sujetos_colonia, sujeto.sujetos_ciudad, sujeto.sujetos_estado, sujeto.sujetos_cp, sujeto.sujetos_pais, sujeto.sujetos_email, sujeto.sujetos_rfc, sujeto.sujetos_referencia, sujeto.sujetos_alias, sujeto.sujetos_cliente, sujeto.sujetos_proveedor, sujeto.sujetos_telefono, sujeto.sujetos_regimen, sujeto.k_sujetos)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
-                            <td class="border border-gray-400 px-2 py-2">
+                            <td class="px-2 py-2 border border-gray-400">
                                 <DangerButton @click="deleteSujetos(sujeto.k_sujetos, sujeto.sujetos_nombre, sujeto.k_empresa)">
                                     <i class="fa-solid fa-trash"></i>
                                 </DangerButton>
@@ -289,7 +289,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     </tbody>
                 </table>
             </div>
-            <div class="bg-white grid v-screen place-items-center">
+            <div class="grid bg-white v-screen place-items-center">
                 <VueTailwindPagination
                     :current="sujetos.currentPage" :total="sujetos.total"
                     :per-page="sujetos.perPage"
@@ -298,42 +298,42 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
             </div>
         </div>
         <Modal :show="modal" @close="closeModal">
-            <div class="flex items-center justify-center flex-col mt-5">
-                <h2 class="p-3 text-lg font-semibolds text-gray-900">{{ title }}</h2>
-                <div class="p-3 mt-3 w-3/4">
+            <div class="flex flex-col items-center justify-center mt-5">
+                <h2 class="p-3 text-lg text-gray-900 font-semibolds">{{ title }}</h2>
+                <div class="w-3/4 p-3 mt-3">
                     <InputLabel for="sujetos_nombre" value="Nombre:"></InputLabel>
                     <TextInput id="sujetos_nombre" ref="nameInput"
-                    v-model="form.sujetos_nombre" type="text" class="mt-1 block w-full" placeholder="Nombre"></TextInput>
+                    v-model="form.sujetos_nombre" type="text" class="block w-full mt-1" placeholder="Nombre"></TextInput>
                     <InputError :message="form.errors.sujetos_nombre" class="mt-2"></InputError>
                 </div>
                 <div class="flex flex-row w-3/4">
                     <div class="p-3">
                         <InputLabel for="sujetos_alias" value="Alias:"></InputLabel>
                         <TextInput id="sujetos_alias"
-                        v-model="form.sujetos_alias" type="text" class="mt-1 mr-6 block-sm w-full"
+                        v-model="form.sujetos_alias" type="text" class="w-full mt-1 mr-6 block-sm"
                         placeholder="Alias"></TextInput>
                         <InputError :message="form.errors.sujetos_alias" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_telefono" value="Teléfono:"></InputLabel>
+                        <InputLabel for="sujetos_telefono" value="Teléfono:" class="ml-4"></InputLabel>
                         <TextInput id="sujetos_telefono"
-                        v-model="form.sujetos_telefono" type="text" class="mt-1 ml-4 block w-full"
+                        v-model="form.sujetos_telefono" type="text" class="block w-full mt-1 ml-4"
                         placeholder="Teléfono"></TextInput>
                         <InputError :message="form.errors.sujetos_telefono" class="mt-2"></InputError>
                     </div>
                 </div>
                 <div class="flex flex-row w-3/4">
                     <div class="p-3">
-                        <InputLabel for="sujetos_calle" value="Calle:"></InputLabel>
+                        <InputLabel for="sujetos_calle" value="Calle:" ></InputLabel>
                         <TextInput id="sujetos_calle"
-                        v-model="form.sujetos_calle" type="text" class="mt-1 mr-6 block w-full"
+                        v-model="form.sujetos_calle" type="text" class="block w-full mt-1 mr-6"
                         placeholder="Calle"></TextInput>
                         <InputError :message="form.errors.sujetos_calle" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_numero_ext" value="Número exterior:"></InputLabel>
+                        <InputLabel for="sujetos_numero_ext" value="Número exterior:" class="ml-4"></InputLabel>
                         <TextInput id="sujetos_numero_ext"
-                        v-model="form.sujetos_numero_ext" type="text" class="mt-1 ml-4 block w-full "
+                        v-model="form.sujetos_numero_ext" type="text" class="block w-full mt-1 ml-4 "
                         placeholder="Número exterior"></TextInput>
                         <InputError :message="form.errors.sujetos_numero_ext" class="mt-2"></InputError>
                     </div>
@@ -342,14 +342,14 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="sujetos_colonia" value="Colonia:"></InputLabel>
                         <TextInput id="sujetos_colonia"
-                        v-model="form.sujetos_colonia" type="text" class="mt-1 mr-6 block w-full"
+                        v-model="form.sujetos_colonia" type="text" class="block w-full mt-1 mr-6"
                         placeholder="Colonia"></TextInput>
                         <InputError :message="form.errors.sujetos_colonia" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_numero_int" value="Número interior:"></InputLabel>
+                        <InputLabel for="sujetos_numero_int" value="Número interior:" class="ml-4"></InputLabel>
                         <TextInput id="sujetos_numero_int"
-                        v-model="form.sujetos_numero_int" type="text" class="mt-1 ml-4 block w-full"
+                        v-model="form.sujetos_numero_int" type="text" class="block w-full mt-1 ml-4"
                         placeholder="Número interior"></TextInput>
                     </div>
                 </div>
@@ -357,14 +357,14 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="sujetos_ciudad" value="Ciudad:"></InputLabel>
                         <TextInput id="sujetos_ciudad"
-                        v-model="form.sujetos_ciudad" type="text" class="mt-1 mr-6 block w-full"
+                        v-model="form.sujetos_ciudad" type="text" class="block w-full mt-1 mr-6"
                         placeholder="Ciudad"></TextInput>
                         <InputError :message="form.errors.sujetos_ciudad" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_estado" value="Estado:"></InputLabel>
+                        <InputLabel for="sujetos_estado" value="Estado:"  class="ml-4"></InputLabel>
                         <TextInput id="sujetos_estado"
-                        v-model="form.sujetos_estado" type="text" class="mt-1 ml-4 block w-full"
+                        v-model="form.sujetos_estado" type="text" class="block w-full mt-1 ml-4"
                         placeholder="Estado"></TextInput>
                         <InputError :message="form.errors.sujetos_estado" class="mt-2"></InputError>
                     </div>
@@ -373,22 +373,22 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="sujetos_cp" value="Código postal:"></InputLabel>
                         <TextInput id="sujetos_cp"
-                        v-model="form.sujetos_cp" type="text" class="mt-1 mr-6 block w-full"
+                        v-model="form.sujetos_cp" type="text" class="block w-full mt-1 mr-6"
                         placeholder="Código postal"></TextInput>
                         <InputError :message="form.errors.sujetos_cp" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_pais" value="País:"></InputLabel>
+                        <InputLabel for="sujetos_pais" value="País:"  class="ml-4"></InputLabel>
                         <TextInput id="sujetos_pais"
-                        v-model="form.sujetos_pais" type="text" class="mt-1 ml-4 block w-full"
+                        v-model="form.sujetos_pais" type="text" class="block w-full mt-1 ml-4"
                         placeholder="País"></TextInput>
                         <InputError :message="form.errors.sujetos_pais" class="mt-2"></InputError>
                     </div>
                 </div>  
-                <div class="p-3 w-3/4">
+                <div class="w-3/4 p-3">
                         <InputLabel for="sujetos_email" value="Email:"></InputLabel>
                         <TextInput id="sujetos_email"
-                        v-model="form.sujetos_email" type="text" class="mt-1 w-full "
+                        v-model="form.sujetos_email" type="text" class="w-full mt-1 "
                         placeholder="Email"></TextInput>
                         <InputError :message="form.errors.sujetos_email" class="mt-2"></InputError>
                 </div>
@@ -396,29 +396,29 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="sujetos_rfc" value="RFC:"></InputLabel>
                         <TextInput id="sujetos_rfc"
-                        v-model="form.sujetos_rfc" type="text" class="mt-1 mr-6 block w-full"
+                        v-model="form.sujetos_rfc" type="text" class="block w-full mt-1 mr-6"
                         placeholder="RFC"></TextInput>
                         <InputError :message="form.errors.sujetos_rfc" class="mt-2"></InputError>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_referencia" value="Referencia:"></InputLabel>
+                        <InputLabel for="sujetos_referencia" value="Referencia:"  class="ml-4"></InputLabel>
                         <TextInput id="sujetos_referencia"
-                        v-model="form.sujetos_referencia" type="text" class="mt-1 ml-4 block w-full"
+                        v-model="form.sujetos_referencia" type="text" class="block w-full mt-1 ml-4"
                         placeholder="Referencia"></TextInput>
                         <InputError :message="form.errors.sujetos_referencia" class="mt-2"></InputError>
                     </div>
                 </div>
-                <div class="flex flex-row my-4 w-3/4">
-                    <div class="mt-1 block w-1/3 ml-4">
+                <div class="flex flex-row w-3/4 my-4">
+                    <div class="block w-1/3 mt-1 ml-4">
                         <input type="radio" id="sujetos_cliente" name="cl_o_pr" value="1" v-model="form.sujetos_cliente">
                         <label for="sujetos_cliente">Cliente</label><br>
                     </div>
-                    <div class="mt-1 block w-1/3 ">
+                    <div class="block w-1/3 mt-1 ">
                         <input type="radio" id="sujetos_proovedor" name="cl_o_pr" default_value="0" value="1" v-model="form.sujetos_proveedor">
                         <label for="sujetos_proovedor">Proovedor</label><br>
                     </div>
                 </div>
-                <div class="p-3 w-3/4">
+                <div class="w-3/4 p-3">
                     <InputLabel for="sujetos_regimen" value="Regimen Fiscal:"></InputLabel>
                     <select id="sujetos_regimen" v-model="form.sujetos_regimen" name="sujetos_regimen" autocomplete="sujetos_regimen" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
                         <option selected disabled value="">Seleccione un régimen fiscal</option>
@@ -453,7 +453,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="p-3 mt-6 flex justify-end">
+            <div class="flex justify-end p-3 mt-6">
                 <SecondaryButton class="ml-3" :disabled="form.processing" @click="closeModal">
                     Cancelar
                 </SecondaryButton>

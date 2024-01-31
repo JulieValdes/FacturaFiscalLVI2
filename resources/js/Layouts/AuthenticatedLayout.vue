@@ -32,7 +32,7 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                             </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex" v-if="$page.props.auth.roles[0] === 'admin'">
                                 <NavLink :href="route('empresas.index')" :active="route().current('empresas.index')">
                                     Empresas
                                 </NavLink>

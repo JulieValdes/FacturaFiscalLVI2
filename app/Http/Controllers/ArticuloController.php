@@ -42,20 +42,18 @@ class ArticuloController extends Controller
             'articulo_unidad_sat' => 'required'
         ]);
 
-        /*$ultimoKArticulo = DB::table('articulos')
-            ->select('k_articulos')
+        $ultimoKArticulo = DB::table('articulos')
+            ->select('k_articulo')
             ->where('k_empresa', $k_empresa_usuario->k_empresa)
-            ->orderByRaw('CAST(k_articulos AS UNSIGNED) DESC')
+            ->orderByRaw('CAST(k_articulo AS UNSIGNED) DESC')
             ->limit(1)
-            ->value('k_articulos');
+            ->value('k_articulo');
         
-        $nuevoKArticulo = $ultimoKArticulo !== null ? (int) $ultimoKArticulo + 1 : 1;*/
-
+        $nuevoKArticulo = $ultimoKArticulo !== null ? (int) $ultimoKArticulo + 1 : 1;
         $articulo = new Articulo();
         $articulo->fill($request->all());
-        ##$articulo->k_articulos = $nuevoKArticulo;
-        $articulo->k_empresa = $k_empresa_usuario ? $k_empresa_usuario->k_empresa : null;
-        
+        $articulo->k_articulo = $nuevoKArticulo;
+        $articulo->k_empresa = $k_empresa_usuario ? $k_empresa_usuario->k_empresa : null;  
         if($articulo->save()){
             return redirect('articulos');
         }
@@ -72,7 +70,7 @@ class ArticuloController extends Controller
             'articulo_unidad_sat' => 'required'
         ]); 
         
-        $result = Articulo::where('k_articulos', $id)
+        $result = Articulo::where('k_articulo', $id)
                 ->where('k_empresa', $request->k_empresa)
                 ->update($request->all());
 
@@ -81,9 +79,8 @@ class ArticuloController extends Controller
         }
     }
 
-    public function destroy(Int $k_articulo, Int $k_empresa){
-        dd($k_articulo, $k_empresa);
-        $result = Articulo::where('k_articulos', $k_articulo)->where('k_empresa', $k_empresa)->delete();
+    public function destroy(Int $k_articulo, Int $k_empresa){ 
+        $result = Articulo::where('k_articulo', $k_articulo)->where('k_empresa', $k_empresa)->delete();
         if($result){
             return redirect('articulos');
         }
