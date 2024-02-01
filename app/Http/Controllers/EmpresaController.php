@@ -50,13 +50,9 @@ class EmpresaController extends Controller
         }
     }
 
-    public function show($id)
+    public function edit(Int $id)
     {
-        //
-    }
-
-    public function edit(Empresa $empresa)
-    {
+        $empresa = Empresa::find($id);
         return Inertia::render('Empresas/Edit', ['empresa' => $empresa]);
     }
 

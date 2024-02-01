@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use App\Models\Venta;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class VentaController extends Controller
 {
@@ -13,11 +17,20 @@ class VentaController extends Controller
             ->select('usrs_empresas.k_empresa')
             ->first();
 
-        $ventas = DB::table('ventas')
+        /*$ventas = DB::table('ventas')
             ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
             ->where('ventas.k_empresa', '=', $k_empresa_usuario->k_empresa)
             ->select('ventas.*')
+            ->get();*/
+
+        $ventas = DB::table('ventas')
+            ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
+            ->join('sujetos', 'ventas.k_sujeto', '=', 'sujetos.k_sujetos')
+            ->where('ventas.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->select('ventas.*', 'sujetos.*')
             ->get();
+        
+        
 
         return Inertia::render('Ventas/Index' , ['ventas' => $ventas]);
     }
@@ -76,11 +89,19 @@ class VentaController extends Controller
             //'venta_uso_cfdi' => 'required'    
         ]);
 
-        $result = Venta::where('k_venta', $id)
+        $result = Venta::where('k_venta', $k_venta)
                ->where('k_empresa', $k_empresa_usuario)
                ->where('k_sujeto', $request->k_sujeto)
                ->update($request->all());
 
+        if ($result) {
+            return redirect('ventas');
+        }
+    }
+
+    public function destroy(Int $k_venta, Int $k_empresa)
+    {
+        $result = Venta::where('k_venta', $k_venta)->where('k_empresa', $k_empresa)->delete();
         if ($result) {
             return redirect('ventas');
         }
