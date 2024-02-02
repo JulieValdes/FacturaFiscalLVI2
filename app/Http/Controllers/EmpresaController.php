@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Empresa;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class EmpresaController extends Controller
 {
@@ -87,5 +89,24 @@ class EmpresaController extends Controller
         if($empresa->delete()){
             return redirect('empresas/index');
         }
+    }
+
+    public function empresasByUser(){
+        $empresas = DB::table('mis_datos')->select('mis_datos.k_empresa', 'mis_datos_nombre')
+            ->join('usrs_empresas', 'mis_datos.k_empresa', '=', 'usrs_empresas.k_empresa')
+            ->where('usrs_empresas.k_user', auth()->user()->id)
+            ->get();
+        return response()->json($empresas );
+    }
+
+    public function setSessionEmpresa(Request $request){
+        $validator = Validator::make($request->all(), [
+            'k_empresa' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 401);
+        }
+        $request->session()->put('SelectedEnterprise', $request->k_empresa);
+        return redirect()->back();
     }
 }

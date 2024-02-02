@@ -6,20 +6,16 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Articulo;
 use App\Models\User;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\DB;
 
 class ArticuloController extends Controller
 {
     public function index()
     {
-        $k_empresa_usuario = User::join('usrs_empresas', 'users.id', '=', 'usrs_empresas.k_user')
-            ->where('users.id', '=', auth()->user()->id)
-            ->select('usrs_empresas.k_empresa')
-            ->first();
-        
         $articulos = DB::table('articulos')
             ->join('mis_datos', 'articulos.k_empresa', '=', 'mis_datos.k_empresa')
-            ->where('articulos.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->where('articulos.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->select('articulos.*')
             ->get();
 
@@ -53,7 +49,7 @@ class ArticuloController extends Controller
         $articulo = new Articulo();
         $articulo->fill($request->all());
         $articulo->k_articulo = $nuevoKArticulo;
-        $articulo->k_empresa = $k_empresa_usuario ? $k_empresa_usuario->k_empresa : null;  
+        $articulo->k_empresa = Session()->get('SelectedEnterprise');
         if($articulo->save()){
             return redirect('articulos');
         }
