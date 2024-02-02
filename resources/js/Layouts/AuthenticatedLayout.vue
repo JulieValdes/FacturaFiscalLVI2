@@ -84,6 +84,11 @@ const OnChangeEmpresa = async (event) => {
                                     Productos
                                 </NavLink>
                             </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('ventas.index')" :active="route().current('ventas.index')">
+                                    Ventas
+                                </NavLink>
+                            </div>
                         </div>
                         <div class="sm:flex sm:items-center sm:ms-6">
                             <form @submit.prevent="handleSubmit">
@@ -188,6 +193,9 @@ const OnChangeEmpresa = async (event) => {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('articulos.index')" :active="route().current('articulos.index')">
                             Articulos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('ventas.index')" :active="route().current('ventas.index')">
+                            Ventas
                         </ResponsiveNavLink>
                     </div>
                     <!-- Responsive Settings Options -->

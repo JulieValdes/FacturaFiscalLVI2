@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\SujetoController;
+use App\Http\Controllers\VentaController;
 
 
 /*
@@ -32,6 +33,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -59,14 +61,17 @@ Route::middleware('auth')->group(function () {
     Route::post('articulos' , [ArticuloController::class, 'store'])->name('articulos.store');
     Route::put('articulos/{id}' , [ArticuloController::class, 'update'])->name('articulos.update');
     Route::delete('articulos/{articulo}/{empresa}' , [ArticuloController::class, 'destroy'])->name('articulos.destroy');
+
+    /*---------------Rutas de ventas------------ */
+    Route::get('ventas' , [VentaController::class, 'index'])->name('ventas.index');
+    Route::post('ventas' , [VentaController::class, 'store'])->name('ventas.store');
+    Route::put('ventas/{id}' , [VentaController::class, 'update'])->name('ventas.update');
+    Route::delete('ventas/{venta}/{empresa}' , [VentaController::class, 'destroy'])->name('ventas.destroy');
 });
 
 Route::get('prueba', function ($id) {
     return "Has accedido a la ruta";
 })->middleware('checkAdmin');
 
-Route::get('no-autorizado', function ($id) {
-    return "No tienes permisos para acceder a esta ruta";
-});
 
 require __DIR__.'/auth.php';
