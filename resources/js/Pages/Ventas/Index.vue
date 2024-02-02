@@ -24,11 +24,12 @@ const k_empresa = ref('');
 const k_sujeto = ref('');
 
 const props = defineProps({
-    ventas: {type:Object}
+    ventas: {type:Object},
+    sujetos: {type:Object}
 });
 
 onMounted(() => {
-    console.log(props.sujetos);
+    console.log(props.ventas);
 })
 
 const form = useForm({
@@ -45,16 +46,16 @@ const form = useForm({
     venta_orden_compra:'',
     venta_comentario1:'',
     venta_comentario2:'',
-    venta_fin:'',
+    venta_fin:'0',
     venta_factura:'',
     venta_UUID:'',
     venta_foliofact:'',
-    venta_formapago:'',
+    venta_formapago:'01 Efectivo',
     venta_condiciones:'',
     venta_serie:'F',
     venta_folio:'',
     venta_tipo:'ingreso',
-    venta_metodo:'01 Efectivo',
+    venta_metodo:'Pago en una sóla exhibición',
     venta_cadena:'',
     ventas_cancelada:'',
     venta_moneda:'',
@@ -69,6 +70,7 @@ const form = useForm({
     venta_uso_cfdi:'',
     tipo_relacion:'', 
     uuid_relacionado:'',
+    sujetos_nombre:'',
 });
 
 const formPage = useForm({});
@@ -78,9 +80,8 @@ const onPageClick = (event)=>{
 }
 
 
-const openModal = (op,empresa, venta, sujeto, venta_fecha, venta_subtotal, venta_iva, venta_ieps, venta_retencion, venta_total, venta_costo, venta_orden_compra, venta_comentario1, venta_comentario2, venta_fin, venta_factura, venta_UUID, venta_foliofact, venta_formapago, venta_condiciones, venta_serie, venta_folio, venta_tipo, venta_metodo, venta_cadena, ventas_cancelada, venta_moneda, venta_tcambio, venta_descuento, venta_motivo_desc, venta_local, venta_local_ret, venta_comenta_metodo, venta_lugar, venta_pagado, venta_uso_cfdi, tipo_relacion, uuid_relacionado  ) =>{
+const openModal = (op,empresa, venta, sujeto, venta_fecha, venta_subtotal, venta_iva, venta_ieps, venta_retencion, venta_total, venta_costo, venta_orden_compra, venta_comentario1, venta_comentario2, venta_fin, venta_factura, venta_UUID, venta_foliofact, venta_formapago, venta_condiciones, venta_serie, venta_folio, venta_tipo, venta_metodo, venta_cadena, ventas_cancelada, venta_moneda, venta_tcambio, venta_descuento, venta_motivo_desc, venta_local, venta_local_ret, venta_comenta_metodo, venta_lugar, venta_pagado, venta_uso_cfdi, tipo_relacion, uuid_relacionado, sujetos) =>{
     console.log("Valor de la venta en openModal:", venta);
-    console.log("Valor de sujetos_regimen antes de abrir el modal:", sujetos_regimen);
     modal.value = true;
 
     nextTick(() => nameInput.value.focus());
@@ -88,16 +89,25 @@ const openModal = (op,empresa, venta, sujeto, venta_fecha, venta_subtotal, venta
     operation.value = op;
     k_venta.value =  venta; 
     k_empresa.value = empresa;
-    k_sujeto.value =sujeto;
+    k_sujeto.value = sujeto;
+
 
     if(op == 1){
-        title.value = 'Crear cliente';
+        title.value = 'Crear venta';
     }
     else{
-        title.value = 'Editar cliente';
-        form.venta_fecha = venta_fecha;
-        f
-
+        title.value = 'Editar venta';
+        form.venta_serie = venta_serie,
+        form.venta_tipo = venta_tipo, 
+        form.sujetos = sujetos
+        form.venta_formapago = venta_formapago, 
+        form.venta_tcambio = venta_tcambio, 
+        form.venta_moneda = venta_moneda,
+        form.venta_metodo = venta_metodo, 
+        form.venta_comenta_metodo= venta_comenta_metodo, 
+        form.venta_uso_cfdi=venta_uso_cfdi, 
+        form.venta_condiciones =venta_condiciones
+        
     }
 }
 
@@ -142,9 +152,9 @@ const save = () =>{
     });
     }
     else{
-        form.k_sujetos = k_sujetos.value;
+        form.k_venta = k_venta.value;
         form.k_empresa = k_empresa.value;
-        form.put(route('sujetos.update', k_sujetos.value), {
+        form.put(route('sujetos.update', k_venta), {
         k_empresa: form.k_empresa,
         sujetos_nombre: form.sujetos_nombre,
         onSuccess: () => {
@@ -186,7 +196,7 @@ const er = (msj) =>{
 }
 
 
-const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
+const deleteSujetos = (sujetos_nombre,k_venta,k_empresa) => {
     const alerta = Swal.mixin({buttonsStyling: false,});
 
     alerta.fire({
@@ -201,7 +211,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
         },
     }).then((result) => {
         if (result.isConfirmed) {
-            form.delete(route('sujetos.destroy',  [k_sujetos, k_empresa]), {
+            form.delete(route('sujetos.destroy',  [k_venta, k_empresa]), {
                 onSuccess: () => {
                     ok('Empresa eliminada');
                 },
@@ -214,11 +224,11 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
 </script>
 
 <template>
-    <Head title="Clientes" />
+    <Head title="Ventas" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Clientes</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Ventas</h2>
         </template>
 
         <div class="py-12">
@@ -250,7 +260,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                         <tr v-for="(venta, index) in ventas" :key="index">
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_serie }}</td>
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_folio }}</td>
-                            <td class="px-2 py-2 border border-gray-400">{{ venta.sujetos_nombre }}</td>
+                            <td class="px-2 py-2 border border-gray-400" >{{ venta.sujetos_nombre }}</td>
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_fecha}}</td>
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_subtotal }}</td>
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_iva}}</td>
@@ -259,13 +269,13 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_factura }} </td>
                             <td class="px-2 py-2 border border-gray-400">
                                 <WarningButton 
-                                    @click="openModal(2, venta.k_empresa, venta.k_venta, venta.k_sujeto, venta.venta_fecha, venta.venta_subtotal, venta.venta_iva, venta.venta_ieps, venta.venta_retencion, venta.venta_total, venta.venta_costo, venta.venta_orden_compra, venta.venta_comentario1, venta.venta_comentario2, venta.venta_fin, venta.venta_factura, venta.venta_UUID, venta.venta_foliofact, venta.venta_formapago, venta.venta_condiciones, venta.venta_serie, venta.venta_folio, venta.venta_tipo, venta.venta_metodo, venta.venta_cadena, venta.ventas_cancelada, venta.venta_moneda, venta.venta_tcambio, venta.venta_descuento, venta.venta_motivo_desc, venta.venta_local, venta.venta_local_ret, venta.venta_comenta_metodo, venta.venta_lugar, venta.venta_pagado, venta.venta_uso_cfdi, venta.tipo_relacion, venta.uuid_relacionado, venta.sujetos_nombre)"
+                                    @click="openModal(2, venta.k_empresa, venta.k_venta, venta.k_sujeto, venta.venta_fecha, venta.venta_subtotal, venta.venta_iva, venta.venta_ieps, venta.venta_retencion, venta.venta_total, venta.venta_costo, venta.venta_orden_compra, venta.venta_comentario1, venta.venta_comentario2, venta.venta_fin, venta.venta_factura, venta.venta_UUID, venta.venta_foliofact, venta.venta_formapago, venta.venta_condiciones, venta.venta_serie, venta.venta_folio, venta.venta_tipo, venta.venta_metodo, venta.venta_cadena, venta.ventas_cancelada, venta.venta_moneda, venta.venta_tcambio, venta.venta_descuento, venta.venta_motivo_desc, venta.venta_local, venta.venta_local_ret, venta.venta_comenta_metodo, venta.venta_lugar, venta.venta_pagado, venta.venta_uso_cfdi, venta.tipo_relacion, venta.uuid_relacionado, sujetos.sujetos_nombre)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
                             <td class="px-2 py-2 border border-gray-400">
-                                <DangerButton @click="deleteSujetos(sujeto.k_sujetos, sujeto.sujetos_nombre, sujeto.k_empresa)">
+                                <DangerButton @click="deleteSujetos(venta.sujetos_nombre, venta.k_venta, venta.k_empresa)">
                                     <i class="fa-solid fa-trash"></i>
                                 </DangerButton>
                             </td>
@@ -277,153 +287,131 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
         <Modal :show="modal" @close="closeModal">
             <div class="flex flex-col items-center justify-center mt-5">
                 <h2 class="p-3 text-lg text-gray-900 font-semibolds">{{ title }}</h2>
-                <div class="w-3/4 p-3 mt-3">
-                    <InputLabel for="sujetos_nombre" value="Nombre:"></InputLabel>
-                    <TextInput id="sujetos_nombre" ref="nameInput"
-                    v-model="form.sujetos_nombre" type="text" class="block w-full mt-1" placeholder="Nombre"></TextInput>
-                    <InputError :message="form.errors.sujetos_nombre" class="mt-2"></InputError>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_alias" value="Alias:"></InputLabel>
-                        <TextInput id="sujetos_alias"
-                        v-model="form.sujetos_alias" type="text" class="w-full mt-1 mr-6 block-sm"
-                        placeholder="Alias"></TextInput>
-                        <InputError :message="form.errors.sujetos_alias" class="mt-2"></InputError>
+
+                <div class="flex flex-row w-3/4 justify-start">
+                    <div class="p-3 mr-46">
+                        <InputLabel for="venta_serie" value="Serie:"></InputLabel>
+                        <select id="venta_serie" v-model="form.venta_serie" name="venta_serie" autocomplete="venta_serie" class=" w-full mt-1 mr-8 block-sm rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="F">F</option>
+                            <option value="A">A</option>
+                        </select>
                     </div>
                     <div class="p-3">
-                        <InputLabel for="sujetos_telefono" value="Teléfono:" class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_telefono"
-                        v-model="form.sujetos_telefono" type="text" class="block w-full mt-1 ml-4"
-                        placeholder="Teléfono"></TextInput>
-                        <InputError :message="form.errors.sujetos_telefono" class="mt-2"></InputError>
+                        <InputLabel for="venta_tipo" value="Tipo:"></InputLabel>
+                        <select id="venta_tipo" v-model="form.venta_tipo" name="venta_tipo" autocomplete="venta_tipo" class="block w-full mt-1 ml-4 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="traslado">Traslado</option>
+                        </select>
                     </div>
                 </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_calle" value="Calle:" ></InputLabel>
-                        <TextInput id="sujetos_calle"
-                        v-model="form.sujetos_calle" type="text" class="block w-full mt-1 mr-6"
-                        placeholder="Calle"></TextInput>
-                        <InputError :message="form.errors.sujetos_calle" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="sujetos_numero_ext" value="Número exterior:" class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_numero_ext"
-                        v-model="form.sujetos_numero_ext" type="text" class="block w-full mt-1 ml-4 "
-                        placeholder="Número exterior"></TextInput>
-                        <InputError :message="form.errors.sujetos_numero_ext" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_colonia" value="Colonia:"></InputLabel>
-                        <TextInput id="sujetos_colonia"
-                        v-model="form.sujetos_colonia" type="text" class="block w-full mt-1 mr-6"
-                        placeholder="Colonia"></TextInput>
-                        <InputError :message="form.errors.sujetos_colonia" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="sujetos_numero_int" value="Número interior:" class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_numero_int"
-                        v-model="form.sujetos_numero_int" type="text" class="block w-full mt-1 ml-4"
-                        placeholder="Número interior"></TextInput>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_ciudad" value="Ciudad:"></InputLabel>
-                        <TextInput id="sujetos_ciudad"
-                        v-model="form.sujetos_ciudad" type="text" class="block w-full mt-1 mr-6"
-                        placeholder="Ciudad"></TextInput>
-                        <InputError :message="form.errors.sujetos_ciudad" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="sujetos_estado" value="Estado:"  class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_estado"
-                        v-model="form.sujetos_estado" type="text" class="block w-full mt-1 ml-4"
-                        placeholder="Estado"></TextInput>
-                        <InputError :message="form.errors.sujetos_estado" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_cp" value="Código postal:"></InputLabel>
-                        <TextInput id="sujetos_cp"
-                        v-model="form.sujetos_cp" type="text" class="block w-full mt-1 mr-6"
-                        placeholder="Código postal"></TextInput>
-                        <InputError :message="form.errors.sujetos_cp" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="sujetos_pais" value="País:"  class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_pais"
-                        v-model="form.sujetos_pais" type="text" class="block w-full mt-1 ml-4"
-                        placeholder="País"></TextInput>
-                        <InputError :message="form.errors.sujetos_pais" class="mt-2"></InputError>
-                    </div>
-                </div>  
+
                 <div class="w-3/4 p-3">
-                        <InputLabel for="sujetos_email" value="Email:"></InputLabel>
-                        <TextInput id="sujetos_email"
-                        v-model="form.sujetos_email" type="text" class="w-full mt-1 "
-                        placeholder="Email"></TextInput>
-                        <InputError :message="form.errors.sujetos_email" class="mt-2"></InputError>
+                        <InputLabel for="sujetos_nombre" value="Cliente:"></InputLabel>
+                        <select v-model="form.sujetos_nombre" name="sujetos_nombre" autocomplete="sujetos_nombre" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                        <option value="" disabled selected>Selecciona un cliente</option>
+                        <option v-for="sujeto in sujetos" :key="sujeto.id" :value="sujeto.id">{{ sujeto.sujetos_nombre }}</option>
+                        </select>
                 </div>
-                <div class="flex flex-row w-3/4">
-                    <div class="p-3">
-                        <InputLabel for="sujetos_rfc" value="RFC:"></InputLabel>
-                        <TextInput id="sujetos_rfc"
-                        v-model="form.sujetos_rfc" type="text" class="block w-full mt-1 mr-6"
-                        placeholder="RFC"></TextInput>
-                        <InputError :message="form.errors.sujetos_rfc" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3">
-                        <InputLabel for="sujetos_referencia" value="Referencia:"  class="ml-4"></InputLabel>
-                        <TextInput id="sujetos_referencia"
-                        v-model="form.sujetos_referencia" type="text" class="block w-full mt-1 ml-4"
-                        placeholder="Referencia"></TextInput>
-                        <InputError :message="form.errors.sujetos_referencia" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="flex flex-row w-3/4 my-4">
-                    <div class="block w-1/3 mt-1 ml-4">
-                        <input type="radio" id="sujetos_cliente" name="cl_o_pr" value="1" v-model="form.sujetos_cliente">
-                        <label for="sujetos_cliente">Cliente</label><br>
-                    </div>
-                    <div class="block w-1/3 mt-1 ">
-                        <input type="radio" id="sujetos_proovedor" name="cl_o_pr" default_value="0" value="1" v-model="form.sujetos_proveedor">
-                        <label for="sujetos_proovedor">Proovedor</label><br>
-                    </div>
-                </div>
+
                 <div class="w-3/4 p-3">
-                    <InputLabel for="sujetos_regimen" value="Regimen Fiscal:"></InputLabel>
-                    <select id="sujetos_regimen" v-model="form.sujetos_regimen" name="sujetos_regimen" autocomplete="sujetos_regimen" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
-                        <option selected disabled value="">Seleccione un régimen fiscal</option>
-                        <option value="601 - General de Ley Personas Morales" selected>601 - General de Ley Personas Morales</option>  
-                        <option value="603 - Personas Morales con Fines no Lucrativos">603 - Personas Morales con Fines no Lucrativos</option>
-                        <option value="605 - Sueldos y Salarios e Ingresos Asimilados a Salarios">605 - Sueldos y Salarios e Ingresos Asimilados a Salarios</option>
-                        <option value="606 - Arrendamiento">606 - Arrendamiento</option>
-                        <option value="607 - Enajenacion o Adquisicion de Bienes">607 - Enajenacion o Adquisicion de Bienes</option>
-                        <option value="608 - Demas ingresos">608 - Demas ingresos</option>
-                        <option value="609 - Consolidacion">609 - Consolidacion</option>
-                        <option value="610 - Residentes en el Extranjero sin Establecimiento Permanente en Mexico">610 - Residentes en el Extranjero sin Establecimiento Permanente en Mexico</option>
-                        <option value="Efectivo">611 - Ingresos por Dividendos (socios y accionistas)</option>611 - Ingresos por Dividendos (socios y accionistas)
-                        <option value="612 - Personas Fisicas con Actividades Empresariales y Profesionales">612 - Personas Fisicas con Actividades Empresariales y Profesionales</option>
-                        <option value="614 - Ingresos por intereses">614 - Ingresos por intereses</option>
-                        <option value="615 - Ingresos por obtencion de premios">615 - Ingresos por obtencion de premios</option>
-                        <option value="616 - Sin obligaciones fiscales">616 - Sin obligaciones fiscales</option>
-                        <option value="620 - Sociedades Cooperativas de Produccion que optan por diferir sus ingresos">620 - Sociedades Cooperativas de Produccion que optan por diferir sus ingresos</option>
-                        <option value="621 - Incorporacion Fiscal">621 - Incorporacion Fiscal</option>
-                        <option value="622 - Actividades Agricolas, Ganaderas, Silvicolas y Pesqueras">622 - Actividades Agricolas, Ganaderas, Silvicolas y Pesqueras</option>
-                        <option value="623 - Opcional para Grupos de Sociedades">623 - Opcional para Grupos de Sociedades</option>
-                        <option value="624 - Coordinados">624 - Coordinados</option>
-                        <option value="624 - Coordinados">625 - Actividades Empresariales con ingresos a traves de Plataformas Tecnologicas</option>
-                        <option value="626 - Simplificado de Confianza">626 - Simplificado de Confianza</option>
-                        <option value="628 - Hidrocarburos">628 - Hidrocarburos</option>
-                        <option value="629 - Fiscales Preferentes y de las Empresas Multinacionales">629 - Fiscales Preferentes y de las Empresas Multinacionales</option>
-                        <option value="630 - Enajenacion de acciones en bolsa de valores">630 - Enajenacion de acciones en bolsa de valores</option>
+                    <InputLabel for="venta_formapago" value="Forma de pago:"></InputLabel>
+                        <select id="venta_formapago" v-model="form.venta_formapago" name="venta_formapago" autocomplete="venta_formapago" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="" disabled selected>Selecciona una forma de pago</option>
+                            <option value="PUE - Pago en una sola exhibición">PUE - Pago en una sola exhibición</option>
+                            <option value="PPD - Pago en parcialidades o diferido">PPD - Pago en parcialidades o diferido</option>
                     </select>
                 </div>
+                
+                <div class="w-3/4 p-3">
+                    <InputLabel for="venta_condiciones" value="Condiciones de pago:"></InputLabel>
+                    <textarea id="venta_condiciones" rows="4" class="block h-12 p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Condiciones"></textarea>
+                
+                </div>
+                
+                
+                <div class="flex flex-row w-3/4 justify-start items-center">
+                    <div class="p-3">
+                        <InputLabel for="venta_moneda" value="Moneda:"></InputLabel>
+                        <select id="venta_moneda" v-model="form.venta_moneda" name="venta_moneda" autocomplete="venta_moneda" class="w-52 mt-1 mr-6 block-sm rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="MXN">MXN</option>
+                        </select>
+                    </div>
+                    <div class="p-3">
+                        <InputLabel for="venta_tcambio" value="Tipo de cambio:"></InputLabel>
+                            <input type="number" id="venta_tcambio" v-model="form.venta_tcambio" name="venta_tcambio" autocomplete="venta_tcambio" class="w-48 mt-1 ml-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" step="1.0000" min="0" />
+                    </div>
+                </div>
+                
+
+                <div class="w-3/4 p-3">
+                    <InputLabel for="venta_metodo" value="Metodo de pago:"></InputLabel>
+                    <select id="venta_metodo" v-model="form.venta_metodo" name="venta_metodo" autocomplete="venta_metodo" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="" disabled selected>Selecciona un metodo de pago</option>
+                            <option value="01 Efectivo" >01 Efectivo</option>
+                            <option value="02 Cheque nominativo">02 Cheque nominativo</option>
+                            <option value="03 Transferencia  electrónica de fondos">03 Transferencia  electrónica de fondos</option>
+                            <option value="04 Tarjeta de crédito">04 Tarjeta de Crédito</option>
+                            <option value="05 Monedero Electrónico">05 Monedero Electrónico</option>
+                            <option value="06 Dinero Electrónico">06 Dinero Electrónico</option>
+                            <option value="07 Tarjetas digitales">07 Tarjetas digitales</option>
+                            <option value="08 Vales de despensa">08 Vales de despensa</option>
+                            <option value="12 Dación en pago">12 Dación en pago</option>
+                            <option value="13 Pago por subrogación">13 Pago por subrogación</option>
+                            <option value="14 Pago por consignación">14 Pago por consignación</option>
+                            <option value="15 Condonación">15 Condonación</option>
+                            <option value="17 Compensación">17 Compensación</option>
+                            <option value="23 Novación">23 Novación</option>
+                            <option value="24 Confusión">24 Confusión</option>
+                            <option value="25 Remisión de Deuda">25 Remisión de Deuda</option>
+                            <option value="26 Prescripción o caducidad">26 Prescripción o caducidad</option>
+                            <option value="27 A satisfacción del acreedor">27 A satisfacción del acreedor</option>
+                            <option value="28 Tarjeta de Debito">28 Tarjeta de Debito</option>
+                            <option value="29 Tarjeta de Servicio">29 Tarjeta de Servicio</option>
+                            <option value="30 Aplicación de anticipos">30 Aplicación de anticipos</option>
+                            <option value="31 Intermediario pagos">31 Intermediario pagos</option>
+                            <option value="99 Por definir">99 Por definir</option>
+                        
+                    </select>
+                </div>
+                
+                <div class="w-3/4 p-3">
+                    <InputLabel for="venta_comenta_metodo" value="Condiciones de pago:"></InputLabel>
+                    <textarea id="venta_comenta_metodo" rows="4" class="block p-2.5 w-full h-12 text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Comentarios metodo de pago"></textarea>
+                
+                </div>
+                
+                <div class="w-3/4 p-3">
+                    <InputLabel for="venta_uso_cfdi" value="Uso del CFDI:"></InputLabel>
+                        <select id="venta_uso_cfdi" v-model="form.venta_uso_cfdi" name="venta_uso_cfdi" autocomplete="venta_uso_cfdi" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="" disabled selected>Selecciona el uso de cdfi</option>
+                            <option value="G01 - Adquisición de mercancias">G01 - Adquisición de mercancias</option>
+                            <option value="G02 - Devoluciones, descuentos o bonificaciones">G02 - Devoluciones, descuentos o bonificaciones</option>
+                            <option selected="" value="G03 - Gastos en general">G03 - Gastos en general</option>
+                            <option value="I01 - Construcciones">I01 - Construcciones</option>
+                            <option value="I02 - Mobilario y equipo de oficina por inversiones">I02 - Mobilario y equipo de oficina por inversiones</option>
+                            <option value="I03 - Equipo de transporte">I03 - Equipo de transporte</option>
+                            <option value="I04 - Equipo de computo y accesorios">I04 - Equipo de computo y accesorios</option>
+                            <option value="I05 - Dados, troqueles, moldes, matrices y herramental">I05 - Dados, troqueles, moldes, matrices y herramental</option>
+                            <option value="I06 - Comunicaciones telefónicas">I06 - Comunicaciones telefónicas</option>
+                            <option value="I07 - Comunicaciones satelitales">I07 - Comunicaciones satelitales</option>
+                            <option value="I08 - Otra maquinaria y equipo">I08 - Otra maquinaria y equipo</option>
+                            <option value="D01 - Honorarios médicos, dentales y gastos hospitalarios">D01 - Honorarios médicos, dentales y gastos hospitalarios</option>
+                            <option value="D02 - Gastos médicos por incapacidad o discapacidad">D02 - Gastos médicos por incapacidad o discapacidad</option>
+                            <option value="D03 - Gastos funerales">D03 - Gastos funerales</option>
+                            <option value="D04 - Donativos">D04 - Donativos</option>
+                            <option value="D05 - Intereses reales efectivamente pagados por créditos hipotecarios (casa habitación)">D05 - Intereses reales efectivamente pagados por créditos hipotecarios (casa habitación)</option>
+                            <option value="D06 - Aportaciones voluntarias al SAR">D06 - Aportaciones voluntarias al SAR</option>
+                            <option value="D07 - Primas por seguros de gastos médicos">D07 - Primas por seguros de gastos médicos</option>
+                            <option value="D08 - Gastos de transportación escolar obligatoria">D08 - Gastos de transportación escolar obligatoria</option>
+                            <option value="D09 - Depósitos en cuentas para el ahorro, primas que tengan como base planes de pensiones">D09 - Depósitos en cuentas para el ahorro, primas que tengan como base planes de pensiones</option>
+                            <option value="D10 - Pagos por servicios educativos (colegiaturas)">D10 - Pagos por servicios educativos (colegiaturas)</option>
+                            <option value="S01 - Sin efectos fiscales">S01 - Sin efectos fiscales</option>
+                            <option value="CP01 - Pagos">CP01 - Pagos</option>
+                            <option value="CN01 - Nomina">CN01 - Nomina</option>
+                    </select>
+                </div>
+
+
                 <div class="p-3 mt-6">
                     <PrimaryButton :disabled="form.processing" @click="save">
                         <i class="fa-solid fa-save"></i> Guardar

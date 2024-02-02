@@ -27,12 +27,15 @@ class VentaController extends Controller
             ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
             ->join('sujetos', 'ventas.k_sujeto', '=', 'sujetos.k_sujetos')
             ->where('ventas.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->where('sujetos.k_empresa', '=', $k_empresa_usuario->k_empresa)
             ->select('ventas.*', 'sujetos.*')
             ->get();
-        
-        
 
-        return Inertia::render('Ventas/Index' , ['ventas' => $ventas]);
+        $sujetos = DB::table('sujetos')
+            ->where('sujetos.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->get();
+
+        return Inertia::render('Ventas/Index' , ['ventas' => $ventas, 'sujetos' =>$sujetos]);
     }
 
     public function store(Request $request){
