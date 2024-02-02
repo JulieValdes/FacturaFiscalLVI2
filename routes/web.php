@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::get('empresas/edit/{id}' , [EmpresaController::class, 'edit'])->name('empresas.edit');
     Route::put('empresas/edit/{id}' , [EmpresaController::class, 'update'])->name('empresas.update');
     Route::delete('empresas/{empresa}' , [EmpresaController::class, 'destroy'])->name('empresas.destroy');
+    Route::get('empresas-by-user', [EmpresaController::class, 'empresasByUser'])->name('empresas.byUser');
+    Route::post('setSessionEmpresa', [EmpresaController::class, 'setSessionEmpresa'])->name('empresas.setSessionEmpresa');
 
     /*---------------Rutas de sujetos------------ */
     Route::get('sujetos' , [SujetoController::class, 'index'])->name('sujetos.index');

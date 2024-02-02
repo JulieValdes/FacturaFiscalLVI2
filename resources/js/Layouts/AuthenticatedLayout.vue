@@ -1,12 +1,47 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const showingNavigationDropdown = ref(false);
+
+const empresas = ref([]);
+const selectedEmpresa = ref(null);
+const loading = ref(false);
+
+onMounted(async () => {
+    try {
+        const response = await axios.get('/empresas-by-user');
+        console.log('response.data:', response.data);
+        empresas.value = response.data;
+        console.log('empresas:', empresas);
+        selectedEmpresa.value = localStorage.getItem('k_empresa');
+        console.log('selectedEmpresa:', selectedEmpresa.value);
+    } catch (error) {
+    }
+});
+
+function clearLocalStorage() {
+    localStorage.removeItem('k_empresa');
+}
+
+const OnChangeEmpresa = async (event) => {
+    loading.value = true;
+    selectedEmpresa.value = event.target.value;
+    console.log('selectedEmpresa:', selectedEmpresa.value);
+    const response = await axios.post('/setSessionEmpresa', {
+        k_empresa: selectedEmpresa.value
+    }).finally(() => {
+        loading.value = false;
+        localStorage.setItem('k_empresa', selectedEmpresa.value);
+        window.location.reload();
+    });
+};
+
 </script>
 
 <template>
@@ -55,7 +90,21 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div>
                         </div>
-
+                        <div class="sm:flex sm:items-center sm:ms-6">
+                            <form @submit.prevent="handleSubmit">
+                                <div class="ms-3 relative" style="width: 300px;">
+                                    <select name="empresa" id="empresa" class="border-0" style="width: 100%;" @change="OnChangeEmpresa">
+                                        <option v-if="!selectedEmpresa" value="">Selecciona una empresa</option>
+                                        <option hidden v-if="selectedEmpresa" :value="selectedEmpresa" selected>
+                                            {{ empresas.find(empresa => empresa.k_empresa == selectedEmpresa).mis_datos_nombre }}
+                                        </option>
+                                        <option v-for="empresa in empresas" :key="empresa.k_empresa" :value="empresa.k_empresa">
+                                            {{ empresa.mis_datos_nombre }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <!-- Settings Dropdown -->
                             <div class="ms-3 relative">
@@ -86,7 +135,7 @@ const showingNavigationDropdown = ref(false);
 
                                     <template #content>
                                         <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
-                                        <DropdownLink :href="route('logout')" method="post" as="button">
+                                        <DropdownLink :href="route('logout')" method="post" as="button" @click="clearLocalStorage">
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -149,7 +198,6 @@ const showingNavigationDropdown = ref(false);
                             Ventas
                         </ResponsiveNavLink>
                     </div>
-
                     <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-1 border-t border-gray-200">
                         <div class="px-4">
@@ -182,4 +230,39 @@ const showingNavigationDropdown = ref(false);
             </main>
         </div>
     </div>
+    <div>
+        <!-- Contenido de tu componente -->
+        <div v-if="loading" class="overlay">
+            <div class="spinner"></div>
+        </div>
+    </div>
 </template>
+
+<style>
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
