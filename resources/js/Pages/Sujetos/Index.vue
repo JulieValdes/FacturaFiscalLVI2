@@ -237,7 +237,7 @@ const deleteSujetos = (k_sujetos, sujetos_nombre,k_empresa) => {
                 </div>
             </div>
             <div class="grid py-3 overflow-x-auto bg-white v-screen place-items-center">
-                <table class="border border-gray-400 table-auto">
+                <table class="border border-gray-400 table-auto w-2/3">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="px-2 py-2">#</th>

@@ -25,8 +25,16 @@ class VentaController extends Controller
         $sujetos = DB::table('sujetos')
             ->where('sujetos.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->get();
+        
 
-        return Inertia::render('Ventas/Index' , ['ventas' => $ventas, 'sujetos' =>$sujetos]);
+        $series = DB::table('series')
+            ->join('mis_datos', 'series.k_empresa', '=', 'mis_datos.k_empresa')
+            ->where('series.k_empresa', '=', Session()->get('SelectedEnterprise'))
+            ->select('series.serie')
+            ->get();
+
+        
+        return Inertia::render('Ventas/Index' , ['ventas' => $ventas, 'sujetos' => $sujetos, 'series' => $series]);
     }
 
     public function store(Request $request){
@@ -82,6 +90,7 @@ class VentaController extends Controller
                ->where('k_empresa', $k_empresa_usuario)
                ->where('k_sujeto', $request->k_sujeto)
                ->update($request->all());
+
 
         if ($result) {
             return redirect('ventas');
