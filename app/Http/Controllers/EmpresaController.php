@@ -15,7 +15,7 @@ class EmpresaController extends Controller
     {
         //$empresas = Empresa::paginate(10);
         //$empresas = DB::table('mis_datos')->select('mis_datos.k_empresa, mis_datos.mis_datos_nombre');
-        $empresas = Empresa::OrderBy('k_empresa', 'asc')->get();
+        $empresas = Empresa::OrderBy('mis_datos_nombre', 'asc')->paginate(10);
         return Inertia::render('Empresas/Index', ['empresas' => $empresas]);
     }
 
