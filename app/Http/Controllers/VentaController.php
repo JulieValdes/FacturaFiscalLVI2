@@ -12,10 +12,6 @@ class VentaController extends Controller
 {
     public function index()
     {
-        $k_empresa_usuario = User::join('usrs_empresas', 'users.id', '=', 'usrs_empresas.k_user')
-            ->where('users.id', '=', auth()->user()->id)
-            ->select('usrs_empresas.k_empresa')
-            ->first();
 
         $ventas = DB::table('ventas')
             ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
@@ -23,6 +19,7 @@ class VentaController extends Controller
             ->where('ventas.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->where('sujetos.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->select('ventas.*', 'sujetos.*')
+            ->orderBy('ventas.venta_fecha', 'desc')
             ->get();
 
         $sujetos = DB::table('sujetos')

@@ -76,9 +76,6 @@ const form = useForm({
 
 const formPage = useForm({});
 
-const onPageClick = (event)=>{
-    formPage.get(route('sujetos.index',{page:event}));
-}
 
 
 const openModal = (op,empresa, venta, sujeto, venta_formapago, venta_condiciones, venta_serie, venta_tipo, venta_metodo, venta_moneda, venta_tcambio, venta_comenta_metodo,venta_uso_cfdi, sujetos_nombre, venta_completa) =>{
