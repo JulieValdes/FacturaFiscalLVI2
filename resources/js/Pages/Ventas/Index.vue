@@ -22,6 +22,7 @@ const operation = ref(1);
 const k_venta = ref('');
 const k_empresa = ref('');
 const k_sujeto = ref('');
+const venta_especifica = ref('');
 
 const props = defineProps({
     ventas: {type:Object},
@@ -59,7 +60,7 @@ const form = useForm({
     venta_cadena:'',
     ventas_cancelada:'',
     venta_moneda:'',
-    venta_tcambio:'',
+    venta_tcambio:'1.0000',
     venta_descuento:'',
     venta_motivo_desc:'',
     venta_local:'',
@@ -75,22 +76,19 @@ const form = useForm({
 
 const formPage = useForm({});
 
-const onPageClick = (event)=>{
-    formPage.get(route('sujetos.index',{page:event}));
-}
 
 
-const openModal = (op,empresa, venta, sujeto, venta_fecha, venta_subtotal, venta_iva, venta_ieps, venta_retencion, venta_total, venta_costo, venta_orden_compra, venta_comentario1, venta_comentario2, venta_fin, venta_factura, venta_UUID, venta_foliofact, venta_formapago, venta_condiciones, venta_serie, venta_folio, venta_tipo, venta_metodo, venta_cadena, ventas_cancelada, venta_moneda, venta_tcambio, venta_descuento, venta_motivo_desc, venta_local, venta_local_ret, venta_comenta_metodo, venta_lugar, venta_pagado, venta_uso_cfdi, tipo_relacion, uuid_relacionado, sujetos) =>{
+const openModal = (op,empresa, venta, sujeto, venta_formapago, venta_condiciones, venta_serie, venta_tipo, venta_metodo, venta_moneda, venta_tcambio, venta_comenta_metodo,venta_uso_cfdi, sujetos_nombre, venta_completa) =>{
     console.log("Valor de la venta en openModal:", venta);
+    console.log("Valor de la venta_completa en openModal:", venta_completa);
     modal.value = true;
 
-    nextTick(() => nameInput.value.focus());
 
     operation.value = op;
     k_venta.value =  venta; 
     k_empresa.value = empresa;
     k_sujeto.value = sujeto;
-
+    venta_especifica.value = venta_completa;
 
     if(op == 1){
         title.value = 'Crear venta';
@@ -99,15 +97,14 @@ const openModal = (op,empresa, venta, sujeto, venta_fecha, venta_subtotal, venta
         title.value = 'Editar venta';
         form.venta_serie = venta_serie,
         form.venta_tipo = venta_tipo, 
-        form.sujetos = sujetos
+        form.sujetos_nombre = sujetos_nombre
         form.venta_formapago = venta_formapago, 
-        form.venta_tcambio = venta_tcambio, 
+        form.venta_condiciones =venta_condiciones,
         form.venta_moneda = venta_moneda,
+        form.venta_tcambio = venta_tcambio, 
         form.venta_metodo = venta_metodo, 
         form.venta_comenta_metodo= venta_comenta_metodo, 
-        form.venta_uso_cfdi=venta_uso_cfdi, 
-        form.venta_condiciones =venta_condiciones
-        
+        form.venta_uso_cfdi=venta_uso_cfdi 
     }
 }
 
@@ -269,7 +266,7 @@ const deleteSujetos = (sujetos_nombre,k_venta,k_empresa) => {
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_factura }} </td>
                             <td class="px-2 py-2 border border-gray-400">
                                 <WarningButton 
-                                    @click="openModal(2, venta.k_empresa, venta.k_venta, venta.k_sujeto, venta.venta_fecha, venta.venta_subtotal, venta.venta_iva, venta.venta_ieps, venta.venta_retencion, venta.venta_total, venta.venta_costo, venta.venta_orden_compra, venta.venta_comentario1, venta.venta_comentario2, venta.venta_fin, venta.venta_factura, venta.venta_UUID, venta.venta_foliofact, venta.venta_formapago, venta.venta_condiciones, venta.venta_serie, venta.venta_folio, venta.venta_tipo, venta.venta_metodo, venta.venta_cadena, venta.ventas_cancelada, venta.venta_moneda, venta.venta_tcambio, venta.venta_descuento, venta.venta_motivo_desc, venta.venta_local, venta.venta_local_ret, venta.venta_comenta_metodo, venta.venta_lugar, venta.venta_pagado, venta.venta_uso_cfdi, venta.tipo_relacion, venta.uuid_relacionado, sujetos.sujetos_nombre)"
+                                    @click="openModal(2, venta.k_empresa, venta.k_venta, venta.k_sujeto, venta.venta_formapago, venta.venta_condiciones, venta.venta_serie, venta.venta_tipo, venta.venta_metodo,   venta.venta_moneda, venta.venta_tcambio, venta.venta_comenta_metodo, venta.venta_uso_cfdi, sujetos.sujetos_nombre, venta)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
@@ -307,7 +304,7 @@ const deleteSujetos = (sujetos_nombre,k_venta,k_empresa) => {
 
                 <div class="w-3/4 p-3">
                         <InputLabel for="sujetos_nombre" value="Cliente:"></InputLabel>
-                        <select v-model="form.sujetos_nombre" name="sujetos_nombre" autocomplete="sujetos_nombre" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                        <select v-model="form.sujetos_nombre" name="sujetos_nombre" id="sujetos_nombre" autocomplete="sujetos_nombre" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
                         <option value="" disabled selected>Selecciona un cliente</option>
                         <option v-for="sujeto in sujetos" :key="sujeto.id" :value="sujeto.id">{{ sujeto.sujetos_nombre }}</option>
                         </select>
@@ -317,7 +314,7 @@ const deleteSujetos = (sujetos_nombre,k_venta,k_empresa) => {
                     <InputLabel for="venta_formapago" value="Forma de pago:"></InputLabel>
                         <select id="venta_formapago" v-model="form.venta_formapago" name="venta_formapago" autocomplete="venta_formapago" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
                             <option value="" disabled selected>Selecciona una forma de pago</option>
-                            <option value="PUE - Pago en una sola exhibición">PUE - Pago en una sola exhibición</option>
+                            <option value="PAGO EN UNA SOLA EXHIBICION">PUE - Pago en una sola exhibición</option>
                             <option value="PPD - Pago en parcialidades o diferido">PPD - Pago en parcialidades o diferido</option>
                     </select>
                 </div>

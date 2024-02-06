@@ -53,7 +53,7 @@ const openModal= (op, articulo, empresa, articulo_clave, articulo_nombre, articu
     operation.value = op;
     
     modal.value = true;
-    nextTick(() => nameInput.value.focus());
+    
 
     operation.value = op;
     k_articulo.value = articulo; 

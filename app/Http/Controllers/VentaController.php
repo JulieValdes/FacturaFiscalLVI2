@@ -12,38 +12,24 @@ class VentaController extends Controller
 {
     public function index()
     {
-        $k_empresa_usuario = User::join('usrs_empresas', 'users.id', '=', 'usrs_empresas.k_user')
-            ->where('users.id', '=', auth()->user()->id)
-            ->select('usrs_empresas.k_empresa')
-            ->first();
-
-        /*$ventas = DB::table('ventas')
-            ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
-            ->where('ventas.k_empresa', '=', $k_empresa_usuario->k_empresa)
-            ->select('ventas.*')
-            ->get();*/
 
         $ventas = DB::table('ventas')
             ->join('mis_datos', 'ventas.k_empresa', '=', 'mis_datos.k_empresa')
             ->join('sujetos', 'ventas.k_sujeto', '=', 'sujetos.k_sujetos')
-            ->where('ventas.k_empresa', '=', $k_empresa_usuario->k_empresa)
-            ->where('sujetos.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->where('ventas.k_empresa', '=', Session()->get('SelectedEnterprise'))
+            ->where('sujetos.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->select('ventas.*', 'sujetos.*')
+            ->orderBy('ventas.venta_fecha', 'desc')
             ->get();
 
         $sujetos = DB::table('sujetos')
-            ->where('sujetos.k_empresa', '=', $k_empresa_usuario->k_empresa)
+            ->where('sujetos.k_empresa', '=', Session()->get('SelectedEnterprise'))
             ->get();
 
         return Inertia::render('Ventas/Index' , ['ventas' => $ventas, 'sujetos' =>$sujetos]);
     }
 
     public function store(Request $request){
-        $k_empresa_usuario = User::join('usrs_empresas', 'users.id', '=', 'usrs_empresas.k_user')
-            ->where('users.id', '=', auth()->user()->id)
-            ->select('usrs_empresas.k_empresa')
-            ->first();
-        
         $request->validate([
             'k_empresa' => 'required',
             'k_sujeto' => 'required',
@@ -67,7 +53,7 @@ class VentaController extends Controller
         $venta->fill($request->all());
         if ($venta->save())
         {
-            return redirect('ventas');
+            return redirect('Ventas/Modificar');
         }
     }
 
