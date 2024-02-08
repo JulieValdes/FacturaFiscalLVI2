@@ -8,12 +8,14 @@ import DangerButton from '@/Components/DangerButton.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import SelectInput from '@/Components/SelectInput.vue';
 import WarningButton from '@/Components/WarningButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Modal from '@/Components/Modal.vue';
-import { nextTick,ref } from 'vue';
-import VueTailwindPagination from '@ocrv/vue-tailwind-pagination';
+import { ref } from 'vue';
+import { FwbTab, FwbTabs } from 'flowbite-vue'
+
+const activeTab = ref('first')
+const action = ref(1);
 
 const { data, meta } = defineProps({
     empresas: Object,
@@ -21,6 +23,38 @@ const { data, meta } = defineProps({
     data: Object,
 });
 
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const fileName = file.name;
+    const fileExtension = fileName.split('.').pop();
+    if (fileExtension !== 'key') {
+        form.errors.mis_datos_archivo_key_file = 'El archivo debe ser de tipo .key';
+        form.mis_datos_archivo_key = '';
+        event.target.value = '';
+    } else {
+        form.errors.mis_datos_archivo_key_file = '';
+        form.mis_datos_archivo_key = fileName;
+    }
+  }
+}
+
+const handleCerFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const fileName = file.name;
+    const fileExtension = fileName.split('.').pop();
+    if (fileExtension !== 'cer') {
+        form.errors.mis_datos_archivo_cert_file = 'El archivo debe ser de tipo .cer';
+        form.mis_datos_archivo_cert = '';
+        event.target.value = '';
+    } else {
+        form.errors.mis_datos_archivo_cert_file = '';
+        form.mis_datos_archivo_cert = fileName;
+    }
+  }
+}
+const showTabs = ref(false);
 const modal = ref(false);
 const title = ref('');
 const municipios = ref([]);
@@ -39,8 +73,10 @@ const form= useForm({
     mis_datos_estado: '',
     mis_datos_pais: '',
     mis_datos_cp: '',
+    mis_datos_archivo_key_file: '',
     mis_datos_archivo_key: '',
     mis_datos_archivo_cert: '',
+    mis_datos_archivo_cert_file: '',
     mis_datos_fecha_inicio: '',
     mis_datos_fecha_fin: '',
     mis_datos_no_cert: '',
@@ -49,7 +85,7 @@ const form= useForm({
     mis_datos_logo_factura: '',
     mis_datos_email: '',
     mis_datos_renglones: '',
-    mis_datos_formapago: '',
+    mis_datos_formapago: 'PUE - PAGO EN UNA SOLA EXHIBICION',
     mis_datos_condicionespago: '',
     mis_datos_metodopago: '',
     mis_datos_pwd_key: '',
@@ -76,7 +112,7 @@ const form= useForm({
     alta_por: '',
     fecha_alta: '',
     mis_datos_cadena: '',
-    mis_datos_decimales: '',
+    mis_datos_decimales: 2,
     mis_datos_version: '',
     mis_datos_mostrar_regimen: '',
     mis_datos_mostrar_moneda: '',
@@ -84,21 +120,24 @@ const form= useForm({
     mis_datos_mostrar_tipo_cfdi: '',
     mis_datos_formato: '',
     mis_datos_forma_abierto: '',
-    mis_datos_formato_pago: '',
-    bloqueado: '',
-    datos_adicionales: '',
-    donativo: '',
+    mis_datos_formato_pago: 'PUE - PAGO EN UNA SOLA EXHIBICION',
+    bloqueado: 0,
+    datos_adicionales: 0,
+    donativo: 0,
     mis_datos_descarga_sat: '',
 });
 
-const openModal = ( action, empresa) => {
+const openModal = ( act, empresa) => {
+    action.value = act;
     modal.value = true;
 
-    switch (action) {
+    switch (action.value) {
         case 1:
+            showTabs.value = false;
             title.value = 'Agregar Empresa';
             break;
         case 2:
+            showTabs.value = true;
             title.value = 'Editar Empresa';
             Object.keys(empresa).forEach((key) => {
                 form[key] = (empresa[key] == null) ? '' : empresa[key];
@@ -140,11 +179,86 @@ const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
     });
 };
 
+const er = (msj) =>{
+    form.reset();
+    closeModal();
+    Swal.fire({title:msj,icon:'error'});
+}
+
+const ok = (msj) =>{
+    form.reset();
+    closeModal();
+    Swal.fire({title:msj,icon:'success'});
+}
+
+const save = () => {
+    if(action.value == 1){
+        form.post(route('empresas.store'), {
+            onSuccess: () => {
+                ok('Artículo agregado');
+                closeModal();
+            },
+            onError: (error) => {
+            // Manejar errores aquí
+            
+            if (error.response) {
+                // El servidor ha respondido con un código de estado fuera del rango de éxito
+                console.error('Error de respuesta del servidor:', error.response);
+                
+                if (error.response.data && error.response.data.message) {
+                    er('Error al actualizar: ' + error.response.data.message);
+                } else {
+                    er('Error al actualizar: respuesta del servidor sin mensaje específico');
+                }
+            } else if (error.request) {
+                // La solicitud fue realizada pero no se recibió respuesta
+                console.error('No se recibió respuesta del servidor');
+                er('Error al actualizar: no se recibió respuesta del servidor');
+            } else {
+                // Algo ocurrió durante la configuración de la solicitud
+                console.error('Error durante la configuración de la solicitud:', error.message);
+                er('Error al actualizar: ' + error.message || 'Error desconocido');
+            }
+            console.error('Error completo:', error);
+        },
+    });
+    }else{
+        form.put(route('empresas.update', form.k_empresa), {
+            onSuccess: () => {
+                ok('Empresa actualizada');
+                closeModal();
+            },
+            onError: (error) => {
+            // Manejar errores aquí
+            console.error('Error completo:', error);
+
+            if (error.response) {
+                // El servidor ha respondido con un código de estado fuera del rango de éxito
+                console.error('Error de respuesta del servidor:', error.response);
+
+                if (error.response.data && error.response.data.message) {
+                    er('Error al actualizar: ' + error.response.data.message);
+                } else {
+                    er('Error al actualizar: respuesta del servidor sin mensaje específico');
+                }
+            } else if (error.request) {
+                // La solicitud fue realizada pero no se recibió respuesta
+                console.error('No se recibió respuesta del servidor');
+                er('Error al actualizar: no se recibió respuesta del servidor');
+            } else {
+                // Algo ocurrió durante la configuración de la solicitud
+                console.error('Error durante la configuración de la solicitud:', error.message);
+                er('Error al actualizar: ' + error.message || 'Error desconocido');
+            }
+        },
+        });
+    }
+}
+
 </script>
 
 <template>
     <Head title="Empresas" />
-
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">Empresas</h2>
@@ -171,14 +285,12 @@ const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
                     </thead>
                     <tbody>
                         <tr v-for="empresa, i in empresas.data" :key="empresa.k_empresa">
-                        <td hidden class="px-4 py-4 border border-gray-400">{{ empresa.k_empresa }}</td>
-                        <td class="px-4 py-4 border border-gray-400">{{ empresa.mis_datos_nombre }}</td>
-                        <td class="px-4 py-4 border border-gray-400">{{ empresa.mis_datos_municipio}}</td>
-                        <td class="px-2 py-2 border border-gray-400">
-                                <WarningButton 
-                                    @click="openModal(2, empresa)"
-                                >
-                                <i class="fa-solid fa-edit"></i>
+                            <td hidden class="px-4 py-4 border border-gray-400">{{ empresa.k_empresa }}</td>
+                            <td class="px-4 py-4 border border-gray-400">{{ empresa.mis_datos_nombre }}</td>
+                            <td class="px-4 py-4 border border-gray-400">{{ empresa.mis_datos_municipio }}</td>
+                            <td class="px-2 py-2 border border-gray-400">
+                                <WarningButton @click="openModal(2, empresa)">
+                                    <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
                             <td class="px-2 py-2 border border-gray-400">
@@ -193,183 +305,241 @@ const deleteEmpresa = (k_empresa, mis_datos_nombre) => {
                 <nav aria-label="Page navigation example">
                     <ul class="flex items-center -space-x-px h-10 text-base">
                         <li>
-                        <a @click.prevent="$inertia.visit(empresas.prev_page_url)" class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            <span class="sr-only">Previous</span>
-                            <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
-                            </svg>
-                        </a>
+                            <a @click.prevent="$inertia.visit(empresas.prev_page_url)"
+                                class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                <span class="sr-only">Previous</span>
+                                <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 6 10">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="M5 1 1 5l4 4" />
+                                </svg>
+                            </a>
                         </li>
                         <li>
-                        <a href="#" aria-current="page" class="z-10 flex items-center justify-center px-4 h-10 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{ empresas.current_page }}</a>
+                            <a href="#" aria-current="page"
+                                class="z-10 flex items-center justify-center px-4 h-10 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{
+                                    empresas.current_page }}</a>
                         </li>
                         <li v-if="empresas.next_page_url">
-                        <a @click.prevent="$inertia.visit(empresas.next_page_url)" class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            <span class="sr-only">Next</span>
-                            <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                            </svg>
-                        </a>
+                            <a @click.prevent="$inertia.visit(empresas.next_page_url)"
+                                class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                <span class="sr-only">Next</span>
+                                <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 6 10">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="m1 9 4-4-4-4" />
+                                </svg>
+                            </a>
                         </li>
                     </ul>
                 </nav>
             </div>
         </div>
         <Modal :show="modal" @close="closeModal" maxWidth="5xl">
-            <div class="flex flex-col items-center justify-center mt-5 w-full">
-                <h2 class="justify-start p-3 text-lg text-gray-900 font-semibolds ">{{ title }}</h2>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_nombre" value="Nombre :">Nombre:</InputLabel>
-                        <TextInput id="mis_datos_nombre" ref="nameInput"
-                        v-model="form.mis_datos_nombre" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="Nombre"></TextInput>
-                        <InputError :message="form.errors.mis_datos_nombre" class="mt-2"></InputError>
+            <fwb-tabs v-model="activeTab" class="p-5">
+                <fwb-tab name="first" title="Datos generales">
+                    <div class="flex flex-col items-center justify-center mt-5 w-full">
+                        <div class="w-5/6 columns-2">
+                            <div hidden class="p-3 w-full">
+                                <InputLabel for="k_empresa" >Nombre:</InputLabel>
+                                <TextInput id="k_empresa" ref="nameInput" v-model="form.k_empresa" type="text"
+                                    class="w-full  mr-6 block-sm" placeholder="k_empresa"></TextInput>
+                                <InputError :message="form.errors.k_empresa" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_nombre" value="Nombre :">Nombre:</InputLabel>
+                                <TextInput id="mis_datos_nombre" ref="nameInput" v-model="form.mis_datos_nombre" type="text"
+                                    class="w-full  mr-6 block-sm" placeholder="Nombre"></TextInput>
+                                <InputError :message="form.errors.mis_datos_nombre" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_razon_social" value="Razon Social Ext:" class="">Razon social:
+                                </InputLabel>
+                                <TextInput id="mis_datos_razon_social" v-model="form.mis_datos_razon_social" type="text"
+                                    class="w-full  block-sm" placeholder="Razón social"></TextInput>
+                                <InputError :message="form.errors.mis_datos_razon_social" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_rfc">RFC:</InputLabel>
+                                <TextInput id="mis_datos_rfc" ref="mis_datos_rfc" v-model="form.mis_datos_rfc" type="text"
+                                    class="w-full  mr-6 block-sm" placeholder="RFC"></TextInput>
+                                <InputError :message="form.errors.mis_datos_rfc" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_email">Email:</InputLabel>
+                                <TextInput id="mis_datos_email" ref="mis_datos_email" v-model="form.mis_datos_email" type="text"
+                                    class="w-full mt-1 mr-6 block-sm" placeholder="Email"></TextInput>
+                                <InputError :message="form.errors.mis_datos_email" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_estado">Estado:</InputLabel>
+                                <select @change="updateMunicipios()" id="mis_datos_estado" ref="mis_datos_estado"
+                                    v-model="form.mis_datos_estado" class="w-full mt-1 mr-6 block-sm border-gray-300 rounded-md">
+                                    <option value="">Selecciona un estado</option>
+                                    <option :value="estado" v-for="(estado, i) in Object.keys(estados)">{{ estado }}</option>
+                                </select>
+                                <InputError :message="form.errors.mis_datos_estado" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_municipio">Municipio:</InputLabel>
+                                <select id="mis_datos_municipio" ref="mis_datos_municipio" :disabled="form.mis_datos_estado == ''"
+                                    v-model="form.mis_datos_municipio" class="w-full mt-1 mr-6 block-sm border-gray-300 rounded-md">
+                                    <option value="">Selecciona un municipio</option>
+                                    <option :value="municipio" v-for="municipio in municipios">{{ municipio }}</option>
+                                </select>
+                                <InputError :message="form.errors.mis_datos_municipio" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_colonia">Colonia:</InputLabel>
+                                <TextInput id="mis_datos_colonia" ref="mis_datos_colonia" v-model="form.mis_datos_colonia"
+                                    type="text" class="w-full mt-1 mr-6 block-sm" placeholder="Colonia"></TextInput>
+                                <InputError :message="form.errors.mis_datos_colonia" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_localidad" class="">Localidad:</InputLabel>
+                                <TextInput id="mis_datos_localidad" v-model="form.mis_datos_localidad" type="text"
+                                    class="w-full mt-1 block-sm" placeholder="Razón social"></TextInput>
+                                <InputError :message="form.errors.mis_datos_localidad" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_cp" class="">Codigo postal:</InputLabel>
+                                <TextInput id="mis_datos_cp" v-model="form.mis_datos_cp" type="text" class="w-full mt-1 block-sm"
+                                    placeholder="Codigo postal"></TextInput>
+                                <InputError :message="form.errors.mis_datos_cp" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_calle" class="">Calle:</InputLabel>
+                                <TextInput id="mis_datos_calle" v-model="form.mis_datos_calle" type="text"
+                                    class="w-full mt-1 block-sm" placeholder="Calle"></TextInput>
+                                <InputError :message="form.errors.mis_datos_calle" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-4">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_no_int" class="">No interior:</InputLabel>
+                                <TextInput id="mis_datos_no_int" v-model="form.mis_datos_no_int" type="text"
+                                    class="w-full mt-1 block-sm" placeholder="No interior"></TextInput>
+                                <InputError :message="form.errors.mis_datos_no_int" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_no_ext">No exterior:</InputLabel>
+                                <TextInput id="mis_datos_no_ext" v-model="form.mis_datos_no_ext" type="text"
+                                    class="w-full mt-1 mr-6 block-sm" placeholder="No exterior"></TextInput>
+                                <InputError :message="form.errors.mis_datos_no_ext" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_fecha_inicio">Inicio de vigencia:</InputLabel>
+                                <TextInput id="mis_datos_fecha_inicio" v-model="form.mis_datos_fecha_inicio" type="date"
+                                    class="w-full mt-1 mr-6 block-sm" placeholder="Inicio de vigencia"></TextInput>
+                                <InputError :message="form.errors.mis_datos_fecha_inicio" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_fecha_fin">Fin de vigencia:</InputLabel>
+                                <TextInput id="mis_datos_fecha_fin" v-model="form.mis_datos_fecha_fin" type="date"
+                                    class="w-full mt-1 mr-6 block-sm" placeholder="Fin de vigencia"></TextInput>
+                                <InputError :message="form.errors.mis_datos_fecha_fin" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div hidden class="p-3 w-full">
+                                <InputLabel for="mis_datos_archivo_key" class="">Llave privada:</InputLabel>
+                                <TextInput id="mis_datos_archivo_key" v-model="form.mis_datos_archivo_key" type="text"
+                                    class="w-full mt-1 block-sm" placeholder="Selecciona un archivo"></TextInput>
+                                <InputError :message="form.errors.mis_datos_archivo_key" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_archivo_key_file">Archivo llave privada:</InputLabel>
+                                <TextInput id="mis_datos_archivo_key_file" v-model="form.mis_datos_archivo_key_file"
+                                    @change="handleFileChange" type="file" accept=".key" class="w-full mt-1 mr-6 block-sm"
+                                    placeholder="Selecciona el archivo"></TextInput>
+                                <InputError :message="form.errors.mis_datos_archivo_key_file" class="mt-2"></InputError>
+                                <small :v-if="form.mis_datos_archivo_key !== ''"> Archivo actual: {{ form.mis_datos_archivo_key
+                                }}</small>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_pwd_key" class="">Password:</InputLabel>
+                                <TextInput id="mis_datos_pwd_key" v-model="form.mis_datos_pwd_key" type="password"
+                                    class="w-full mt-1 block-sm" placeholder="Password"></TextInput>
+                                <InputError :message="form.errors.mis_datos_pwd_key" class="mt-2"></InputError>
+                            </div>
+                            <div hidden class="p-3 w-full">
+                                <InputLabel for="mis_datos_archivo_cert">Certificado:</InputLabel>
+                                <TextInput id="mis_datos_archivo_cert" v-model="form.mis_datos_archivo_cert" type="text"
+                                    class="w-full mt-1 mr-6 block-sm" placeholder="Certificado"></TextInput>
+                                <InputError :message="form.errors.mis_datos_archivo_cert" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-1">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_archivo_cert_file">Archivo de certficiado:</InputLabel>
+                                <TextInput id="mis_datos_archivo_cert_file" v-model="form.mis_datos_archivo_cert_file"
+                                    @change="handleCerFileChange" type="file" class="w-full mt-1 mr-6 block-sm"
+                                    placeholder="Fin de vigencia"></TextInput>
+                                <InputError :message="form.errors.mis_datos_archivo_cert_file" class="mt-2"></InputError>
+                                <small :v-if="form.mis_datos_archivo_cert !== ''"> Archivo actual: {{ form.mis_datos_archivo_cert
+                                }}</small>
+                            </div>
+                        </div>
+                        <div class="p-3 mt-3">
+                            <PrimaryButton :disabled="form.processing" @click="save">
+                                <i class="fa-solid fa-save"></i> Guardar
+                            </PrimaryButton>
+                        </div>
                     </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_razon_social" value="Razon Social Ext:" class="">Razon social:</InputLabel>
-                        <TextInput id="mis_datos_razon_social"
-                        v-model="form.mis_datos_razon_social" type="text" class="w-full mt-1 block-sm"
-                        placeholder="Razón social"></TextInput>
-                        <InputError :message="form.errors.mis_datos_razon_social" class="mt-2"></InputError>
+                </fwb-tab>
+                <fwb-tab name="second" title="Valores por default">
+                    <div class="flex flex-col items-center justify-center mt-5 w-full">
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_decimales" >Nombre:</InputLabel>
+                                <TextInput id="mis_datos_decimales" ref="mis_datos_decimales" v-model="form.mis_datos_decimales" type="text"
+                                    class="w-full  mr-6 block-sm" placeholder="Nombre"></TextInput>
+                                <InputError :message="form.errors.mis_datos_decimales" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_razon_social" value="Razon Social Ext:" class="">Razon social:
+                                </InputLabel>
+                                <TextInput id="mis_datos_razon_social" v-model="form.mis_datos_razon_social" type="text"
+                                    class="w-full  block-sm" placeholder="Razón social"></TextInput>
+                                <InputError :message="form.errors.mis_datos_razon_social" class="mt-2"></InputError>
+                            </div>
+                        </div>
+                        <div class="w-5/6 columns-2">
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_formapago" >Nombre:</InputLabel>
+                                <TextInput id="mis_datos_formapago" ref="mis_datos_formapago" v-model="form.mis_datos_formapago" type="text"
+                                    class="w-full  mr-6 block-sm" placeholder="mis_datos_formapago"></TextInput>
+                                <InputError :message="form.errors.mis_datos_formapago" class="mt-2"></InputError>
+                            </div>
+                            <div class="p-3 w-full">
+                                <InputLabel for="mis_datos_razon_social" value="Razon Social Ext:" class="">Razon social:
+                                </InputLabel>
+                                <TextInput id="mis_datos_razon_social" v-model="form.mis_datos_razon_social" type="text"
+                                    class="w-full  block-sm" placeholder="Razón social"></TextInput>
+                                <InputError :message="form.errors.mis_datos_razon_social" class="mt-2"></InputError>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_rfc">RFC:</InputLabel>
-                        <TextInput id="mis_datos_rfc" ref="mis_datos_rfc"
-                        v-model="form.mis_datos_rfc" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="RFC"></TextInput>
-                        <InputError :message="form.errors.mis_datos_rfc" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_email">Email:</InputLabel>
-                        <TextInput id="mis_datos_email" ref="mis_datos_email"
-                        v-model="form.mis_datos_email" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="Email"></TextInput>
-                        <InputError :message="form.errors.mis_datos_email" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_estado">Estado:</InputLabel>
-                        <select @change="updateMunicipios()" id="mis_datos_estado" ref="mis_datos_estado"
-                        v-model="form.mis_datos_estado" class="w-full mt-1 mr-6 block-sm border-gray-300 rounded-md">
-                            <option value="">Selecciona un estado</option>
-                            <option :value="estado" v-for="(estado, i) in Object.keys(estados)">{{ estado }}</option>
-                        </select>
-                        <InputError :message="form.errors.mis_datos_estado" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_municipio">Municipio:</InputLabel>
-                        <select id="mis_datos_municipio" ref="mis_datos_municipio" :disabled="form.mis_datos_estado == ''"
-                        v-model="form.mis_datos_municipio" class="w-full mt-1 mr-6 block-sm border-gray-300 rounded-md">
-                            <option value="">Selecciona un municipio</option>
-                            <option :value="municipio" v-for="municipio in municipios">{{ municipio }}</option>
-                        </select>
-                        <InputError :message="form.errors.mis_datos_municipio" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_colonia">Colonia:</InputLabel>
-                        <TextInput id="mis_datos_colonia" ref="mis_datos_colonia"
-                        v-model="form.mis_datos_colonia" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="Colonia"></TextInput>
-                        <InputError :message="form.errors.mis_datos_colonia" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_localidad" class="">Localidad:</InputLabel>
-                        <TextInput id="mis_datos_localidad"
-                        v-model="form.mis_datos_localidad" type="text" class="w-full mt-1 block-sm"
-                        placeholder="Razón social"></TextInput>
-                        <InputError :message="form.errors.mis_datos_localidad" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_cp" class="">Codigo postal:</InputLabel>
-                        <TextInput id="mis_datos_cp"
-                        v-model="form.mis_datos_cp" type="text" class="w-full mt-1 block-sm"
-                        placeholder="Codigo postal"></TextInput>
-                        <InputError :message="form.errors.mis_datos_cp" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_calle" class="">Calle:</InputLabel>
-                        <TextInput id="mis_datos_calle"
-                        v-model="form.mis_datos_calle" type="text" class="w-full mt-1 block-sm"
-                        placeholder="Calle"></TextInput>
-                        <InputError :message="form.errors.mis_datos_calle" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="w-5/6 columns-4">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_no_int" class="">No interior:</InputLabel>
-                        <TextInput id="mis_datos_no_int"
-                        v-model="form.mis_datos_no_int" type="text" class="w-full mt-1 block-sm"
-                        placeholder="No interior"></TextInput>
-                        <InputError :message="form.errors.mis_datos_no_int" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_no_ext">No exterior:</InputLabel>
-                        <TextInput id="mis_datos_no_ext"
-                        v-model="form.mis_datos_no_ext" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="No exterior"></TextInput>
-                        <InputError :message="form.errors.mis_datos_no_ext" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_fecha_inicio">Inicio de vigencia:</InputLabel>
-                        <TextInput id="mis_datos_fecha_inicio"
-                        v-model="form.mis_datos_fecha_inicio" type="date" class="w-full mt-1 mr-6 block-sm" placeholder="Inicio de vigencia"></TextInput>
-                        <InputError :message="form.errors.mis_datos_fecha_inicio" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_fecha_fin">Fin de vigencia:</InputLabel>
-                        <TextInput id="mis_datos_fecha_fin"
-                        v-model="form.mis_datos_fecha_fin" type="date" class="w-full mt-1 mr-6 block-sm" placeholder="Fin de vigencia"></TextInput>
-                        <InputError :message="form.errors.mis_datos_fecha_fin" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="w-5/6 columns-2">
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_archivo_key" class="">Llave privada:</InputLabel>
-                        <TextInput id="mis_datos_archivo_key"
-                        v-model="form.mis_datos_archivo_key" type="text" class="w-full mt-1 block-sm"
-                        placeholder="Selecciona un archivo"></TextInput>
-                        <InputError :message="form.errors.mis_datos_archivo_key" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_no_ext">No exterior:</InputLabel>
-                        <TextInput id="mis_datos_no_ext"
-                        v-model="form.mis_datos_no_ext" type="text" class="w-full mt-1 mr-6 block-sm" placeholder="No exterior"></TextInput>
-                        <InputError :message="form.errors.mis_datos_no_ext" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_fecha_inicio">Inicio de vigencia:</InputLabel>
-                        <TextInput id="mis_datos_fecha_inicio"
-                        v-model="form.mis_datos_fecha_inicio" type="date" class="w-full mt-1 mr-6 block-sm" placeholder="Inicio de vigencia"></TextInput>
-                        <InputError :message="form.errors.mis_datos_fecha_inicio" class="mt-2"></InputError>
-                    </div>
-                    <div class="p-3 w-full">
-                        <InputLabel for="mis_datos_fecha_fin">Fin de vigencia:</InputLabel>
-                        <TextInput id="mis_datos_fecha_fin"
-                        v-model="form.mis_datos_fecha_fin" type="date" class="w-full mt-1 mr-6 block-sm" placeholder="Fin de vigencia"></TextInput>
-                        <InputError :message="form.errors.mis_datos_fecha_fin" class="mt-2"></InputError>
-                    </div>
-                </div>
-                <div class="p-3 mt-3">
-                    <PrimaryButton :disabled="form.processing" @click="save">
-                        <i class="fa-solid fa-save"></i> Guardar
-                    </PrimaryButton>
-                </div>
-            </div>
+                </fwb-tab>
+            </fwb-tabs>
             <div class="flex justify-end p-3 mt-6">
                 <SecondaryButton class="ml-3" :disabled="form.processing" @click="closeModal">
                     Cancelar
                 </SecondaryButton>
             </div>
-            
         </Modal>
     </AuthenticatedLayout>
 </template>
-
-
 <script>
+
 const estados = ({
     "Aguascalientes": ["Aguascalientes","Asientos","Calvillo","Cosio","El Llano","Jesus Maria","Pabellon de Arteaga","Rincon de Romos","San Francisco de los Romo","San Jose de Gracia","Tepezala"],
     "Baja California": ["Ensenada","Mexicali","Playas de Rosarito","Tecate","Tijuana"],

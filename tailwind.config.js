@@ -8,7 +8,11 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.vue',
-        "./node_modules/flowbite/**/*.js"
+        "./resources/js/Layouts/AuthenticatedLayout.vue",
+        "./resources/js/Layouts/GuestLayout.vue",
+        'node_modules/flowbite-vue/**/*.{js,jsx,ts,tsx,vue}',
+        'node_modules/flowbite/**/*.{js,jsx,ts,tsx}',
+        "./resources/js/Components/Modal.vue"
     ],
 
     theme: {
