@@ -333,6 +333,7 @@ const deleteArticulo = (k_articulo, articulo_nombre, k_empresa) => {
                         <div class="w-full ml-6 mt-7 block-sm">
                             <input type="radio"  id="articulo_almacenable" name="cl_o_pr" default_value="0" value="1" v-model="form.articulo_almacenable">
                             <label for="articulo_almacenable">Almacenable</label><br>
+                            <InputError :message="form.errors.articulo_almacenable" class="mt-2"></InputError>
                         </div>
                     </div>
                 </div>

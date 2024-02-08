@@ -138,6 +138,7 @@ const OnChangeEmpresa = async (event) => {
                                         <DropdownLink :href="route('logout')" method="post" as="button" @click="clearLocalStorage">
                                             Log Out
                                         </DropdownLink>
+
                                     </template>
                                 </Dropdown>
                             </div>

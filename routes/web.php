@@ -67,15 +67,13 @@ Route::middleware('auth')->group(function () {
     Route::post('ventas' , [VentaController::class, 'store'])->name('ventas.store');
     Route::put('ventas/{id}' , [VentaController::class, 'update'])->name('ventas.update');
     Route::delete('ventas/{venta}/{empresa}' , [VentaController::class, 'destroy'])->name('ventas.destroy');
+
 });
 
-Route::get('prueba', function ($id) {
-    return "Has accedido a la ruta";
-})->middleware('checkAdmin');
 
 
 require __DIR__.'/auth.php';
 
-Auth::routes();
+//Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

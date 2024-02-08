@@ -9,24 +9,14 @@
         "@inertiajs/vue3": "^1.0.0",
         "@popperjs/core": "^2.11.6",
         "@tailwindcss/forms": "^0.5.3",
-<<<<<<< HEAD
-        "@vitejs/plugin-vue": "^5.0.0",
-        "autoprefixer": "^10.4.17",
-=======
         "@vitejs/plugin-vue": "^5.0.3",
         "autoprefixer": "^10.4.12",
->>>>>>> b29ab0eed0576c25eb168473b4eacf2a113307e1
         "axios": "^1.6.4",
         "bootstrap": "^5.2.3",
         "laravel-vite-plugin": "^1.0.0",
-<<<<<<< HEAD
-        "postcss": "^8.4.35",
-        "tailwindcss": "^3.4.1",
-=======
         "postcss": "^8.4.31",
         "sass": "^1.56.1",
         "tailwindcss": "^3.2.1",
->>>>>>> b29ab0eed0576c25eb168473b4eacf2a113307e1
         "vite": "^5.0.0",
         "vue": "^3.4.0"
     },

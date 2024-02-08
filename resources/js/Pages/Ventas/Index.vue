@@ -15,14 +15,11 @@ import { onMounted } from 'vue';
 
 
 
-const nameInput = ref(null);
 const modal = ref(false);
 const title = ref('');
 const operation = ref(1);
 const k_venta = ref('');
 const k_empresa = ref('');
-const k_sujeto = ref('');
-const venta_especifica = ref('');
 
 const props = defineProps({
     ventas: {type:Object},
@@ -30,15 +27,12 @@ const props = defineProps({
     series: {type:Object},
 });
 
-onMounted(() => {
-    console.log(props.series);
-});
 
 const form = useForm({
     k_empresa : '',
     k_venta:'',
     k_sujeto: '',
-    venta_fecha:'', 
+    venta_fecha:'',
     venta_subtotal:'0.00',
     venta_iva:'0.000',
     venta_ieps:'0.0000',
@@ -52,37 +46,33 @@ const form = useForm({
     venta_factura:'',
     venta_UUID:'',
     venta_foliofact:'',
-    venta_formapago:'01 Efectivo',
+    venta_formapago:'PUE - Pago en una sola exhibición',
     venta_condiciones:'',
-    venta_serie:'',
+    venta_serie:'F',
     venta_folio:'',
     venta_tipo:'ingreso',
-    venta_metodo:'Pago en una sóla exhibición',
+    venta_metodo:'',
     venta_cadena:'',
     ventas_cancelada:'',
-    venta_moneda:'',
+    venta_moneda:'MXN',
     venta_tcambio:'1.0000',
     venta_descuento:'',
     venta_motivo_desc:'',
     venta_local:'',
     venta_local_ret:'',
     venta_comenta_metodo:'',
-    venta_lugar:'', 
+    venta_lugar:'',
     venta_pagado:'',
-    venta_uso_cfdi:'G03 - Gastos en general',
-    tipo_relacion:'', 
+    venta_uso_cfdi:'',
+    tipo_relacion:'',
     uuid_relacionado:'',
 });
-
-const formPage = useForm({});
-
 
 
 const openModal = (op, venta) =>{
     modal.value = true;
-
     operation.value = op;
-
+    
 
     if(op == 1){
         title.value = 'Crear venta';
@@ -91,7 +81,7 @@ const openModal = (op, venta) =>{
         title.value = 'Editar venta';
 
         Object.keys(venta).forEach((key) => {
-                form[key] = (venta[key] == null) ? '' : venta[key];
+                form[key] = venta[key] !== null ? venta[key] : form[key];   
             });
     }
 }
@@ -110,15 +100,15 @@ const ok = (msj) =>{
 
 const save = () =>{
     if(operation.value == 1){
-        form.post(route('sujetos.store'),{
-            onSuccess: () => {ok('Cliente creado')},
+        console.log(form.venta_metodo);
+        form.post(route('ventas.store'),{
+            onSuccess: () => {ok('Venta creado')},
             onError: (error) => {
-            // Manejar errores aquí
-            
+
             if (error.response) {
                 // El servidor ha respondido con un código de estado fuera del rango de éxito
                 console.error('Error de respuesta del servidor:', error.response);
-                
+
                 if (error.response.data && error.response.data.message) {
                     er('Error al actualizar: ' + error.response.data.message);
                 } else {
@@ -138,13 +128,16 @@ const save = () =>{
     });
     }
     else{
-        form.k_venta = k_venta.value;
-        form.k_empresa = k_empresa.value;
-        form.put(route('sujetos.update', k_venta), {
+
+        k_venta.value = form.k_venta ;
+        k_empresa.value = form.k_empresa;
+        console.log(form); 
+        form.put(route('ventas.update', k_venta.value), {
         k_empresa: form.k_empresa,
         sujetos_nombre: form.sujetos_nombre,
+        k_venta: form.k_venta,
         onSuccess: () => {
-            ok('Cliente actualizado');
+            ok('Venta actualizada');
         },
         onError: (error) => {
             // Manejar errores aquí
@@ -174,19 +167,17 @@ const save = () =>{
     }
 }
 
-
 const er = (msj) =>{
     form.reset();
     closeModal();
     Swal.fire({title:msj,icon:'error'});
 }
 
-
-const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
+const deleteVentas = (sujetos_nombre,k_venta, k_empresa) => {
     const alerta = Swal.mixin({buttonsStyling: false,});
 
     alerta.fire({
-        title: '¿Estás seguro que quieres eliminar ' + sujetos_nombre + '?',
+        title: '¿Estás seguro que quieres eliminar la venta de ' + sujetos_nombre + '?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: '<i class="ml-2 fa-solid fa-check"></i> Sí, eliminar',
@@ -199,7 +190,7 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
         if (result.isConfirmed) {
             form.delete(route('sujetos.destroy',  [k_venta, k_empresa]), {
                 onSuccess: () => {
-                    ok('Empresa eliminada');
+                    ok('Venta eliminada');
                 },
 
             });
@@ -254,7 +245,7 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_moneda}}</td>
                             <td class="px-2 py-2 border border-gray-400">{{ venta.venta_factura }} </td>
                             <td class="px-2 py-2 border border-gray-400">
-                                <WarningButton 
+                                <WarningButton
                                     @click="openModal(2, venta)"
                                 >
                                 <i class="fa-solid fa-edit"></i>
@@ -276,15 +267,16 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
 
                 <div class="flex flex-row w-3/4 justify-start">
                     <div class="p-3 w-1/4 ">
-                        <InputLabel for="venta_serie" value="Serie:"></InputLabel>
-                        <select v-model="form.venta_serie" id="venta_serie" name="venta_serie"  class="block w-full mt-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                        <InputLabel  value="Serie:"></InputLabel>
+                        <select name="venta_serie" id="venta_serie" v-model="form.venta_serie"  class="block w-full mt-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
                             <option value="" disabled selected>Serie</option>
                             <option v-for="serie in series" :key="serie.id" :value="serie.id">{{serie.serie }}</option>
                         </select>
                     </div>
                     <div class="p-3 ml-20   ">
-                        <InputLabel for="venta_tipo" value="Tipo:"></InputLabel>
-                        <select v-model="form.venta_tipo" id="venta_tipo" name="venta_tipo" class="block w-full mt-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                        <InputLabel  value="Tipo:"></InputLabel>
+                        <select name="venta_tipo" id="venta_tipo" v-model="form.venta_tipo"  class="block w-full mt-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="" selected disabled>Tipo</option>
                             <option value="ingreso">Ingreso</option>
                             <option value="traslado">Traslado</option>
                         </select>
@@ -293,16 +285,16 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
 
                 <div class="w-3/4 p-3">
                     <InputLabel for="sujetos_nombre" value="Cliente:"></InputLabel>
-                    <select v-model="form.sujetos_nombre" name="sujetos_nombre" id="sujetos_nombre"  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                    <select  v-model="form.k_sujeto" name="sujetos_nombre" id="sujetos_nombre"  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
                     <option value="" disabled selected>Selecciona un cliente</option>
-                    <option v-for="sujeto in sujetos" :key="sujeto.id" :value="sujeto.id">{{ sujeto.sujetos_nombre }}</option>
+                    <option  v-for="sujeto in sujetos" :key="sujeto.id" :value="sujeto.id">{{ sujeto.sujetos_nombre }}</option>
                     </select>
                 </div>
 
                 <div class="w-3/4 p-3">
-                    <InputLabel for="venta_formapago" value="Forma de pago:"></InputLabel>
+                    <InputLabel  value="Forma de pago:"></InputLabel>
                     <select v-model="form.venta_formapago" id="venta_formapago" name="venta_formapago" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
-                        <option value="" disabled selected>Selecciona una forma de pago</option>
+                        <option value=""  disabled selected>Selecciona una forma de pago</option>
                         <option value="PUE - Pago en una sola exhibición">PUE - Pago en una sola exhibición</option>
                         <option value="PPD - Pago en parcialidades o diferido">PPD - Pago en parcialidades o diferido</option>
                     </select>
@@ -310,8 +302,8 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                 
                 <div class="w-3/4 p-3">
                     <InputLabel for="venta_condiciones" value="Condiciones de pago:"></InputLabel>
-                    <textarea id="venta_condiciones" rows="4" class="block h-12 p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Condiciones"></textarea>
-                
+                    <textarea v-model="form.venta_condiciones" id="venta_condiciones" rows="4" class="block h-12 p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Condiciones"></textarea>
+                    
                 </div>
                 
                 
@@ -319,21 +311,23 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                     <div class="p-3">
                         <InputLabel for="venta_moneda" value="Moneda:"></InputLabel>
                         <select id="venta_moneda" v-model="form.venta_moneda" name="venta_moneda" autocomplete="venta_moneda" class="w-52 mt-1 mr-6 block-sm rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option disabled selected value="">Moneda</option>
                             <option selected value="MXN">MXN</option>
                         </select>
+                        
                     </div>
                     <div class="p-3">
                         <InputLabel for="venta_tcambio" value="Tipo de cambio:"></InputLabel>
                             <input type="number" id="venta_tcambio" v-model="form.venta_tcambio" name="venta_tcambio" autocomplete="venta_tcambio" class="w-48 mt-1 ml-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" step="1.0000" min="0" />
+                        
                     </div>
                 </div>
-                
 
                 <div class="w-3/4 p-3">
                     <InputLabel for="venta_metodo" value="Metodo de pago:"></InputLabel>
-                    <select id="venta_metodo" v-model="form.venta_metodo" name="venta_metodo" autocomplete="venta_metodo" class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
-                            <option value="" disabled >Selecciona un metodo de pago</option>
-                            <option value="01 Efectivo" selected>01 Efectivo</option>
+                    <select id="venta_metodo" v-model="form.venta_metodo" name="venta_metodo"  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ">
+                            <option value="" disabled selected>Selecciona un metodo de pago</option>
+                            <option value="01 Efectivo" >01 Efectivo</option>
                             <option value="02 Cheque nominativo">02 Cheque nominativo</option>
                             <option value="03 Transferencia  electrónica de fondos">03 Transferencia  electrónica de fondos</option>
                             <option value="04 Tarjeta de crédito">04 Tarjeta de Crédito</option>
@@ -356,14 +350,14 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                             <option value="30 Aplicación de anticipos">30 Aplicación de anticipos</option>
                             <option value="31 Intermediario pagos">31 Intermediario pagos</option>
                             <option value="99 Por definir">99 Por definir</option>
-                        
                     </select>
+                    
                 </div>
                 
                 <div class="w-3/4 p-3">
                     <InputLabel for="venta_comenta_metodo" value="Comentario :"></InputLabel>
-                    <textarea id="venta_comenta_metodo" rows="4" class="block p-2.5 w-full h-12 text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Comentarios metodo de pago"></textarea>
-                
+                    <textarea id="venta_comenta_metodo" v-model="form.venta_comenta_metodo" rows="4" class="block p-2.5 w-full h-12 text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600" placeholder="Comentarios metodo de pago"></textarea>
+                    
                 </div>
                 
                 <div class="w-3/4 p-3">
@@ -397,7 +391,6 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                     </select>
                 </div>
 
-
                 <div class="p-3 mt-6">
                     <PrimaryButton :disabled="form.processing" @click="save">
                         <i class="fa-solid fa-save"></i> Guardar
@@ -409,7 +402,7 @@ const deleteVentas = (sujetos_nombre,k_venta,k_empresa) => {
                     Cancelar
                 </SecondaryButton>
             </div>
-            
+
         </Modal>
     </AuthenticatedLayout>
 </template>
